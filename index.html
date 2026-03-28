@@ -201,6 +201,14 @@
         "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間:", "未設定:"
     ];
 
+    // 💡 【追加】 個別のヒント（24個分）
+const placeholderHints = [
+    "13121232", "00000000", "00000000", "00000000", "00000000", "00000000", // 盤面
+    "00000000", "00000000", "00000000", "00000000", "00000000", "00000000", // プラス
+    "00000000", "00000000", "00000000", "00000000", "00000000", "00000000", // BE
+    "通常盤面", "プラス分", "赤・青", "黄・紫", "1.5秒", "0"              // 特殊項目
+];
+
     // ページ読み込み完了時に実行
     window.addEventListener('DOMContentLoaded', () => {
         // --- A. 来場者数 (自分専用) ---
@@ -256,18 +264,21 @@
     // 3. 探索実行と統計の送信
     // =========================================
     function startSearch() {
-        // 全員の探索回数を +1 する
-        db.ref('puyo_stats/execs').transaction(c => (c || 0) + 1);
+    // 統計を増やす処理（省略）
+    db.ref('puyo_stats/execs').transaction(c => (c || 0) + 1);
 
-        const inputs = document.querySelectorAll('.input-field');
-        const combinedData = Array.from(inputs).map(i => i.value || "00000000").join(",");
-        
-        if (typeof Module !== 'undefined' && Module.ccall) {
-            Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
-        } else {
-            alert("WebAssemblyを読み込み中です。少々お待ちください。");
-        }
+    const inputs = document.querySelectorAll('.input-field');
+    
+    // 💡 ここがポイント！ .padStart(8, '0') を追加
+    const combinedData = Array.from(inputs).map(i => {
+        let val = i.value || "0"; // 空なら0
+        return val.padStart(8, '0'); // 8桁になるまで左側を"0"で埋める
+    }).join(",");
+
+    if (typeof Module !== 'undefined' && Module.ccall) {
+        Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
     }
+}
 
     // C言語側から呼ばれるパターン数加算
     function addPatternCount(count) {
