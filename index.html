@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ぷよクエ解析シミュレーター</title>
     <style>
-        /* 全体：少しグラデーションを入れて高級感を出す */
+        /* 基本設定 */
         body { 
             background: linear-gradient(135deg, #2c3e50 0%, #000000 100%); 
             color: white; font-family: 'Helvetica Neue', Arial, sans-serif; 
@@ -16,38 +16,45 @@
         /* 1. 上部：説明エリア */
         .usage-section {
             background-color: rgba(52, 73, 94, 0.8); padding: 15px; border-radius: 10px; border-left: 6px solid #f1c40f;
-            max-width: 1200px; margin: 0 auto 20px auto; text-align: left; font-size: 0.85em;
+            max-width: 1400px; margin: 0 auto 20px auto; text-align: left; font-size: 0.85em;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        /* 2. メインレイアウト（中央寄せに変更） */
+        /* 2. メインレイアウト */
         .wrapper { 
             display: flex; 
-            gap: 40px; 
-            justify-content: center; /* 中央に寄せて余白を均等にする */
+            gap: 30px; 
+            justify-content: center; 
             max-width: 1600px; 
             margin: 0 auto; 
             align-items: flex-start; 
         }
 
-        /* 左側：入力エリア */
+        /* 左側：入力エリア (2列にするために幅を広げました) */
         .side-input { 
-            flex: 0 0 190px; background-color: #34495e; padding: 15px; border-radius: 10px; 
+            flex: 0 0 360px; /* 幅を約360pxに拡大 */
+            background-color: #34495e; padding: 15px; border-radius: 10px; 
             border: 1px solid #7f8c8d; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
+
+        /* 入力欄を2列に並べるコンテナ */
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 均等に2列 */
+            column-gap: 15px;
+            row-gap: 5px;
+        }
         
+        /* 入力行の設定 */
+        .input-row { display: flex; align-items: center; justify-content: space-between; }
+        .input-label { width: 65px; text-align: right; margin-right: 5px; font-size: 10px; color: #bdc3c7; white-space: nowrap; overflow: hidden; }
+        .input-field { width: 75px; height: 20px; font-size: 12px; text-align: center; border-radius: 3px; border: 1px solid #bdc3c7; background: #ecf0f1; }
+
         /* 表示エリア全体のコンテナ */
         .main-display { display: flex; flex-direction: column; gap: 30px; }
+        .display-row { display: flex; gap: 30px; align-items: flex-start; justify-content: flex-start; }
 
-        /* 横並び行コンテナ */
-        .display-row { display: flex; gap: 40px; align-items: flex-start; justify-content: flex-start; }
-
-        /* 入力行の設定 */
-        .input-row { display: flex; align-items: center; margin-bottom: 4px; }
-        .input-label { width: 75px; text-align: right; margin-right: 10px; font-size: 11px; color: #bdc3c7; }
-        .input-field { width: 90px; height: 22px; font-size: 13px; text-align: center; border-radius: 4px; border: 1px solid #bdc3c7; background: #ecf0f1; }
-
-        /* 盤面エリア（サイズを少し拡大） */
+        /* 盤面エリア */
         .board-wrapper { text-align: center; }
         .board-title { font-size: 0.9em; color: #ecf0f1; margin-bottom: 6px; border-left: 4px solid #3498db; padding-left: 8px; text-align: left; font-weight: bold; }
         .board-container { 
@@ -55,27 +62,26 @@
             display: inline-block; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
         
-        /* 1セル 32px に拡大 */
         .grid { display: grid; grid-template-columns: 45px repeat(8, 32px); gap: 3px; }
         .cell { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 10px; }
         .data-cell { background-color: rgba(236, 240, 241, 0.05); border-radius: 50%; border: 1px solid rgba(127, 140, 141, 0.4); color: rgba(255,255,255,0.15); }
         .header-cell { color: #f1c40f; font-weight: bold; background-color: rgba(0,0,0,0.4); border-radius: 4px; }
         .origin-cell { width: 45px; font-size: 11px; color: #bdc3c7; background-color: rgba(0,0,0,0.5); }
 
-        /* なぞり消し結果ボックス（存在感を出す） */
+        /* なぞり消し結果ボックス */
         .side-result { 
-            width: 320px; background-color: #34495e; padding: 20px; border-radius: 10px; border: 2px solid #1abc9c; 
+            width: 250px; background-color: #34495e; padding: 15px; border-radius: 10px; border: 2px solid #1abc9c; 
             box-shadow: 0 0 20px rgba(26, 188, 156, 0.3); align-self: stretch; display: flex; flex-direction: column; justify-content: center;
         }
-        .result-title { font-size: 1em; color: #1abc9c; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #1abc9c; padding-bottom: 5px; }
-        .result-box { font-size: 1.6em; font-weight: bold; color: #fff; background: linear-gradient(to bottom, #1abc9c, #16a085); padding: 20px 10px; border-radius: 6px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .result-title { font-size: 0.9em; color: #1abc9c; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1abc9c; padding-bottom: 5px; }
+        .result-box { font-size: 1.5em; font-weight: bold; color: #fff; background: linear-gradient(to bottom, #1abc9c, #16a085); padding: 15px 5px; border-radius: 6px; text-align: center; }
 
-        /* コメント欄エリア */
-        .comment-section { max-width: 1200px; margin: 50px auto; background-color: #34495e; padding: 25px; border-radius: 12px; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .comment-textarea { width: 100%; height: 100px; border-radius: 6px; border: 1px solid #7f8c8d; padding: 12px; box-sizing: border-box; margin: 15px 0; font-size: 14px; }
+        /* コメント欄 */
+        .comment-section { max-width: 1400px; margin: 50px auto; background-color: #34495e; padding: 25px; border-radius: 12px; text-align: left; }
+        .comment-textarea { width: 100%; height: 80px; border-radius: 6px; border: 1px solid #7f8c8d; padding: 12px; box-sizing: border-box; margin: 15px 0; }
         
-        .btn { background: linear-gradient(to bottom, #e74c3c, #c0392b); color: white; padding: 10px; border: none; border-radius: 25px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; font-size: 1em; }
-        .btn:hover { background: #ff5e4d; }
+        .btn { background: linear-gradient(to bottom, #e74c3c, #c0392b); color: white; padding: 12px; border: none; border-radius: 30px; cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px #952d23; }
+        .btn:active { transform: translateY(2px); box-shadow: 0 2px #952d23; }
         .submit-btn { background-color: #3498db; color: white; border: none; padding: 10px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
@@ -85,13 +91,13 @@
 
     <div class="usage-section">
         <strong>💡 使い方ガイド</strong><br>
-        1. 左側の入力欄に行ごとの盤面データを数値(0-5)で入力してください。<br>
-        2. 「探索開始」ボタンを押すと、最適ななぞり消し位置と結果が表示されます。
+        左側の入力欄に各行のデータと設定値を入力し、「探索開始」ボタンを押してください。
     </div>
 
     <div class="wrapper">
         <div class="side-input">
-            <div id="input-section"></div>
+            <div id="input-section" class="input-grid">
+                </div>
             <button class="btn">🚀 探索開始</button>
         </div>
 
@@ -105,19 +111,19 @@
 
                 <div class="side-result">
                     <div class="result-title">📍 解析完了</div>
-                    <div style="font-size: 0.9em; color: #bdc3c7; margin-bottom: 10px;">推奨なぞり消し開始位置</div>
+                    <div style="font-size: 0.8em; color: #bdc3c7; margin-bottom: 10px;">推奨なぞり消し開始位置</div>
                     <div id="trace-result" class="result-box">-- 行 -- 列</div>
                 </div>
             </div>
 
             <div class="display-row">
                 <div class="board-wrapper">
-                    <div class="board-title">塗り替え盤面 1 (シミュレート)</div>
+                    <div class="board-title">塗り替え盤面 1</div>
                     <div class="board-container"><div id="repaint-board-1" class="grid"></div></div>
                 </div>
 
                 <div class="board-wrapper">
-                    <div class="board-title">塗り替え盤面 2 (シミュレート)</div>
+                    <div class="board-title">塗り替え盤面 2</div>
                     <div class="board-container"><div id="repaint-board-2" class="grid"></div></div>
                 </div>
             </div>
@@ -127,22 +133,24 @@
 
     <div class="comment-section">
         <div style="font-size: 1.2em; color: #3498db; font-weight: bold;">💬 掲示板 / フィードバック</div>
-        <textarea class="comment-textarea" placeholder="要望、バグ報告、感想などをお待ちしております..."></textarea>
+        <textarea class="comment-textarea" placeholder="メッセージを入力..."></textarea>
         <div style="text-align: right;">
             <button class="submit-btn">送信する</button>
         </div>
     </div>
 
     <script>
+        // ★ 24個のラベルを設定 ★
         const inputLabels = [
             "行 1:", "行 2:", "行 3:", "行 4:", "行 5:", "行 6:", 
             "初期消し:", "同時消し:", "設定 9:", "設定 10:",
             "設定 11:", "設定 12:", "設定 13:", "設定 14:", "設定 15:",
-            "設定 16:", "設定 17:", "設定 18:", "設定 19:", "設定 20:"
+            "設定 16:", "設定 17:", "設定 18:", "設定 19:", "設定 20:",
+            "設定 21:", "設定 22:", "設定 23:", "設定 24:"
         ];
 
         const inputSection = document.getElementById('input-section');
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 24; i++) {
             const rowDiv = document.createElement('div');
             rowDiv.className = 'input-row';
             rowDiv.innerHTML = `<label class="input-label">${inputLabels[i]}</label><input type="text" maxlength="8" class="input-field" placeholder="00000000">`;
