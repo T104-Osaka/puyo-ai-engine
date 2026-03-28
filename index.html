@@ -12,48 +12,53 @@
         /* 1. 上部：使い方の説明エリア */
         .usage-section {
             background-color: #34495e; padding: 10px; border-radius: 8px; border-left: 6px solid #f1c40f;
-            max-width: 1300px; margin: 0 auto 15px auto; text-align: left; font-size: 0.8em;
+            max-width: 1400px; margin: 0 0 15px 0; text-align: left; font-size: 0.8em;
         }
 
-        /* 2. メインレイアウト (左入力 / 右表示) */
-        .wrapper { display: flex; gap: 20px; justify-content: center; max-width: 1400px; margin: 0 auto; align-items: flex-start; }
+        /* 2. メインレイアウト (左寄せ設定) */
+        .wrapper { 
+            display: flex; 
+            gap: 30px; 
+            justify-content: flex-start; /* 左端に寄せる */
+            max-width: 1500px; 
+            margin: 0; 
+            align-items: flex-start; 
+        }
 
-        /* 左側：入力エリア (15%目安) */
+        /* 左側：入力エリア (サイズ維持しつつ配置) */
         .side-input { flex: 0 0 170px; background-color: #34495e; padding: 10px; border-radius: 6px; border: 1px solid #7f8c8d; }
         
-        /* 右側：表示エリア全体 */
-        .main-display { flex: 1; display: flex; flex-direction: column; gap: 25px; align-items: center; }
+        /* 表示エリア全体のコンテナ */
+        .main-display { display: flex; gap: 30px; align-items: flex-start; }
 
-        /* 盤面を横に並べるための行コンテナ */
-        .board-row { display: flex; gap: 25px; justify-content: center; align-items: flex-start; width: 100%; }
+        /* 縦に並べる列のコンテナ */
+        .display-column { display: flex; flex-direction: column; gap: 20px; }
 
         /* 入力行の設定 */
         .input-row { display: flex; align-items: center; margin-bottom: 3px; }
-        .input-label { width: 65px; text-align: right; margin-right: 8px; font-size: 10px; color: #bdc3c7; white-space: nowrap; }
+        .input-label { width: 65px; text-align: right; margin-right: 8px; font-size: 10px; color: #bdc3c7; }
         .input-field { width: 80px; height: 18px; font-size: 11px; text-align: center; border-radius: 2px; border: 1px solid #bdc3c7; }
 
         /* 盤面エリア（Excelヘッダー付き） */
         .board-wrapper { text-align: center; }
         .board-title { font-size: 0.85em; color: #ecf0f1; margin-bottom: 4px; border-left: 4px solid #3498db; padding-left: 6px; text-align: left; }
         .board-container { background-color: #34495e; padding: 5px; border-radius: 4px; border: 1px solid #7f8c8d; display: inline-block; }
-        
-        /* 9列(ラベル1 + データ8) のグリッド */
         .grid { display: grid; grid-template-columns: 40px repeat(8, 28px); gap: 2px; }
+        
         .cell { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 9px; }
         .data-cell { background-color: rgba(236, 240, 241, 0.1); border-radius: 50%; border: 1px solid rgba(127, 140, 141, 0.3); color: rgba(255,255,255,0.2); }
         .header-cell { color: #f1c40f; font-weight: bold; background-color: rgba(0,0,0,0.2); border-radius: 3px; }
         .origin-cell { width: 40px; font-size: 10px; color: #bdc3c7; background-color: rgba(0,0,0,0.3); }
 
-        /* なぞり消し結果ボックス (盤面の横に置く用) */
+        /* なぞり消し結果ボックス */
         .side-result { 
-            width: 180px; background-color: #34495e; padding: 15px; border-radius: 6px; border: 2px solid #1abc9c; 
-            display: flex; flex-direction: column; justify-content: center; align-self: stretch;
+            width: 280px; background-color: #34495e; padding: 15px; border-radius: 6px; border: 2px solid #1abc9c; 
         }
         .result-title { font-size: 0.9em; color: #1abc9c; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #1abc9c; }
-        .result-box { font-size: 1.3em; font-weight: bold; color: #fff; background: #16a085; padding: 15px 5px; border-radius: 4px; }
+        .result-box { font-size: 1.3em; font-weight: bold; color: #fff; background: #16a085; padding: 15px 5px; border-radius: 4px; text-align: center; }
 
         /* コメント欄エリア */
-        .comment-section { max-width: 1300px; margin: 40px auto 20px auto; background-color: #34495e; padding: 20px; border-radius: 8px; text-align: left; }
+        .comment-section { max-width: 1300px; margin: 40px 0 20px 0; background-color: #34495e; padding: 20px; border-radius: 8px; text-align: left; }
         .comment-textarea { width: 100%; height: 80px; border-radius: 4px; border: 1px solid #7f8c8d; padding: 10px; box-sizing: border-box; margin: 10px 0; }
         
         .btn { background-color: #e74c3c; color: white; padding: 8px; border: none; border-radius: 20px; cursor: pointer; width: 100%; margin-top: 5px; }
@@ -66,7 +71,7 @@
 
     <div class="usage-section">
         <strong>💡 使い方ガイド</strong><br>
-        ここに説明文を入力してください。
+        左側の入力欄にデータを入力し、「探索開始」を押してください。
     </div>
 
     <div class="wrapper">
@@ -77,22 +82,22 @@
 
         <div class="main-display">
             
-            <div class="board-row">
+            <div class="display-column">
                 <div class="board-wrapper">
                     <div class="board-title">出力盤面 (結果)</div>
                     <div class="board-container"><div id="output-board" class="grid"></div></div>
                 </div>
+                <div class="board-wrapper">
+                    <div class="board-title">塗り替え盤面 1</div>
+                    <div class="board-container"><div id="repaint-board-1" class="grid"></div></div>
+                </div>
+            </div>
+
+            <div class="display-column">
                 <div class="side-result">
                     <div class="result-title">📍 解析結果</div>
                     <div style="font-size: 0.8em; color: #bdc3c7; margin-bottom: 5px;">なぞり消し開始位置</div>
                     <div id="trace-result" class="result-box">-- 行 -- 列</div>
-                </div>
-            </div>
-
-            <div class="board-row">
-                <div class="board-wrapper">
-                    <div class="board-title">塗り替え盤面 1</div>
-                    <div class="board-container"><div id="repaint-board-1" class="grid"></div></div>
                 </div>
                 <div class="board-wrapper">
                     <div class="board-title">塗り替え盤面 2</div>
@@ -110,12 +115,11 @@
     </div>
 
     <script>
-        // 入力ラベルの設定（ここを自分で自由に書き換えてください）
         const inputLabels = [
             "行 1:", "行 2:", "行 3:", "行 4:", "行 5:", "行 6:", 
-            "初期消し:", "同時消し:", "項目 9:", "項目 10:",
-            "項目 11:", "項目 12:", "項目 13:", "項目 14:", "項目 15:",
-            "項目 16:", "項目 17:", "項目 18:", "項目 19:", "項目 20:"
+            "初期消し:", "同時消し:", "設定 9:", "設定 10:",
+            "設定 11:", "設定 12:", "設定 13:", "設定 14:", "設定 15:",
+            "設定 16:", "設定 17:", "設定 18:", "設定 19:", "設定 20:"
         ];
 
         const inputSection = document.getElementById('input-section');
@@ -126,7 +130,6 @@
             inputSection.appendChild(rowDiv);
         }
 
-        // Excel風グリッド生成関数
         function createExcelGrid(gridId) {
             const grid = document.getElementById(gridId);
             for (let r = 0; r <= 6; r++) {
