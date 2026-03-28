@@ -170,136 +170,13 @@
         </div>
     </div>
 
-    <script>
-        // =========================================
-        // 1. ラベル設定 (24個)
-        // =========================================
-        const inputLabels = [
-            "盤面行 1:", "盤面行 2:", "盤面行 3:", "盤面行 4:", "盤面行 5:", "盤面行 6:", 
-            "+行 1:", "+行 2:", "+行 3:", "+行 4:", "+行 5:", "+行 6:", 
-            "BE行 1:", "BE行 2:", "BE行 3:", "BE行 4:", "BE行 5:", "BE行 6:", 
-            "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間:", "未設定:"
-        ];
-
-// --- 統計用グローバル変数 ---
-        let totalExecutions = 0;
-        let totalPatterns = 0;
-
-        // 来場者数のカウント（ローカルストレージ使用）
-        window.addEventListener('DOMContentLoaded', () => {
-            let visits = localStorage.getItem('puyo_visits') || 0;
-            visits++;
-            localStorage.setItem('puyo_visits', visits);
-            document.getElementById('visitor-count').textContent = visits.toLocaleString();
-        });
-
-        // 探索開始時に回数を増やす
-        function startSearch() {
-            totalExecutions++; // 回数をカウント
-            document.getElementById('total-execs').textContent = totalExecutions.toLocaleString();
-
-            const inputs = document.querySelectorAll('.input-field');
-            const combinedData = Array.from(inputs).map(i => i.value || "00000000").join(",");
-            
-            if (typeof Module !== 'undefined' && Module.ccall) {
-                Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
-            }
-        }
-
-        // C言語から呼ばれる「探索パターン数」の加算関数
-        function addPatternCount(count) {
-            totalPatterns += count;
-            document.getElementById('total-patterns').textContent = totalPatterns.toLocaleString();
-        }
-        const inputSection = document.getElementById('input-section');
-        for (let i = 0; i < 24; i++) {
-            const rowDiv = document.createElement('div');
-            rowDiv.className = 'input-row';
-            rowDiv.innerHTML = `<label class="input-label">${inputLabels[i]}</label><input type="text" maxlength="8" class="input-field" placeholder="00000000">`;
-            inputSection.appendChild(rowDiv);
-        }
-
-        // =========================================
-        // 2. 盤面生成
-        // =========================================
-        function createExcelGrid(gridId) {
-            const grid = document.getElementById(gridId);
-            for (let r = 0; r <= 6; r++) {
-                for (let c = 0; c <= 8; c++) {
-                    const cell = document.createElement('div');
-                    if (r === 0 && c === 0) { cell.className = 'cell origin-cell'; cell.textContent = '行\\列'; }
-                    else if (r === 0) { cell.className = 'cell header-cell'; cell.textContent = c; }
-                    else if (c === 0) { cell.className = 'cell header-cell'; cell.style.width = '45px'; cell.textContent = r; }
-                    else { 
-                        cell.className = 'cell data-cell'; 
-                        cell.id = `${gridId}-cell-${(r-1)*8 + (c-1)}`; 
-                    }
-                    grid.appendChild(cell);
-                }
-            }
-        }
-        createExcelGrid('original-board');
-        createExcelGrid('output-board');
-        createExcelGrid('repaint-board-1');
-        createExcelGrid('repaint-board-2');
-
-        // =========================================
-        
-
-        /**
-         * 盤面の各マスを更新する
-         * @param gridId HTML要素のID
-         * @param index マス番号(0-47)
-         * @param colorIndex 色(0-5)
-         * @param isPlus プラスぷよなら1
-         * @param isBonus ボーナスエリアなら1
-         */
-        function updateUICell(gridId, index, colorIndex, isPlus = 0, isBonus = 0) {
-            const cell = document.getElementById(`${gridId}-cell-${index}`);
-            if (!cell) return;
-
-            // ぷよの色定義
-            const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ff3eff"];
-            
-            // 🍑 「ももいろ」と背景色の設定
-            if (colorIndex === 0 && (gridId === "original-board" || gridId === "output-board")) {
-                cell.style.backgroundColor = "#ffdae9"; // ももいろ
-            } else {
-                cell.style.backgroundColor = colors[colorIndex] || "rgba(255,255,255,0.05)";
-            }
-            
-            // 📝 テキスト表示ロジック（記号のみを表示）
-            let text = "";
-            if (isPlus) text += "+";
-            if (isBonus) text += "B";
-            
-            // ★以前あった「text = colorIndex;」の部分を削除しました
-            
-            cell.textContent = text;
-        }
-
-        /**
-         * なぞり位置のテキスト表示
-         */
-        function updateUITrace(row, col, colorIndex) {
-            const colorNames = ["空", "●", "●", "●", "●", "●"];
-            const colorCodes = ["#ccc", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ff3eff"];
-            const target = document.getElementById('trace-result');
-            const colorName = colorNames[colorIndex] || "??";
-            const colorCode = colorCodes[colorIndex] || "#fff";
-
-            target.innerHTML = `
-                ${row} 行 ${col} 列 
-                <span style="color: ${colorCode}; margin-left: 12px; text-shadow: 0 0 10px ${colorCode};">
-                    ${colorName}
-                </span>
-            `;
-        }
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
 
 <script>
-    // 2. あなた専用の設定（さっき取得したやつ！）
+    // =========================================
+    // 1. Firebase 設定と初期化
+    // =========================================
     const firebaseConfig = {
         apiKey: "AIzaSyBxMptE0LD0sBSbJq1D3YHaM0hy36zu05g",
         authDomain: "puyo-logic-stats.firebaseapp.com",
@@ -311,21 +188,75 @@
         measurementId: "G-1GYB847L0E"
     };
 
-    // Firebase 初期化
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 3. 全員の合計をリアルタイムに受け取って表示
-    // (Firebaseの中身が変わると、自動的にここの数字が書き換わります)
-    db.ref('puyo_stats').on('value', (snapshot) => {
-        const data = snapshot.val() || { execs: 0, patterns: 0 };
-        document.getElementById('total-execs').textContent = data.execs.toLocaleString();
-        document.getElementById('total-patterns').textContent = data.patterns.toLocaleString();
+    // =========================================
+    // 2. グローバル変数と初期化処理 (UI生成)
+    // =========================================
+    const inputLabels = [
+        "盤面行 1:", "盤面行 2:", "盤面行 3:", "盤面行 4:", "盤面行 5:", "盤面行 6:", 
+        "+行 1:", "+行 2:", "+行 3:", "+行 4:", "+行 5:", "+行 6:", 
+        "BE行 1:", "BE行 2:", "BE行 3:", "BE行 4:", "BE行 5:", "BE行 6:", 
+        "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間:", "未設定:"
+    ];
+
+    // ページ読み込み完了時に実行
+    window.addEventListener('DOMContentLoaded', () => {
+        // --- A. 来場者数 (自分専用) ---
+        let visits = localStorage.getItem('puyo_visits') || 0;
+        visits++;
+        localStorage.setItem('puyo_visits', visits);
+        document.getElementById('visitor-count').textContent = visits.toLocaleString();
+
+        // --- B. 全員の合計統計をリアルタイムに受け取る ---
+        db.ref('puyo_stats').on('value', (snapshot) => {
+            const data = snapshot.val() || { execs: 0, patterns: 0 };
+            document.getElementById('total-execs').textContent = data.execs.toLocaleString();
+            document.getElementById('total-patterns').textContent = data.patterns.toLocaleString();
+        });
+
+        // --- C. 入力欄 24個を生成 ---
+        const inputSection = document.getElementById('input-section');
+        inputSection.innerHTML = ""; 
+        for (let i = 0; i < 24; i++) {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'input-row';
+            rowDiv.innerHTML = `<label class="input-label">${inputLabels[i]}</label><input type="text" maxlength="8" class="input-field" placeholder="00000000">`;
+            inputSection.appendChild(rowDiv);
+        }
+
+        // --- D. 盤面グリッドを生成 ---
+        createExcelGrid('original-board');
+        createExcelGrid('output-board');
+        createExcelGrid('repaint-board-1');
+        createExcelGrid('repaint-board-2');
     });
 
-    // 4. 探索開始ボタン（全員の探索回数を +1 する）
+    // 盤面をHTMLとして組み立てる関数
+    function createExcelGrid(gridId) {
+        const grid = document.getElementById(gridId);
+        grid.innerHTML = ""; 
+        for (let r = 0; r <= 6; r++) {
+            for (let c = 0; c <= 8; c++) {
+                const cell = document.createElement('div');
+                if (r === 0 && c === 0) { cell.className = 'cell origin-cell'; cell.textContent = '行\\列'; }
+                else if (r === 0) { cell.className = 'cell header-cell'; cell.textContent = c; }
+                else if (c === 0) { cell.className = 'cell header-cell'; cell.style.width = '45px'; cell.textContent = r; }
+                else { 
+                    cell.className = 'cell data-cell'; 
+                    cell.id = `${gridId}-cell-${(r-1)*8 + (c-1)}`; 
+                }
+                grid.appendChild(cell);
+            }
+        }
+    }
+
+    // =========================================
+    // 3. 探索実行と統計の送信
+    // =========================================
     function startSearch() {
-        // Firebaseの数字を増やす
+        // 全員の探索回数を +1 する
         db.ref('puyo_stats/execs').transaction(c => (c || 0) + 1);
 
         const inputs = document.querySelectorAll('.input-field');
@@ -333,13 +264,49 @@
         
         if (typeof Module !== 'undefined' && Module.ccall) {
             Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
+        } else {
+            alert("WebAssemblyを読み込み中です。少々お待ちください。");
         }
     }
 
-    // 5. パターン数加算（C言語から呼ばれる）
+    // C言語側から呼ばれるパターン数加算
     function addPatternCount(count) {
-        // Firebaseの総パターン数にプラスする
+        // 全員の総パターン数に加算
         db.ref('puyo_stats/patterns').transaction(c => (c || 0) + count);
+    }
+
+    // =========================================
+    // 4. UI更新 (色・記号)
+    // =========================================
+    function updateUICell(gridId, index, colorIndex, isPlus = 0, isBonus = 0) {
+        const cell = document.getElementById(`${gridId}-cell-${index}`);
+        if (!cell) return;
+
+        const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ff3eff"];
+        
+        // 🌸 空（0）を白っぽいピンクにする
+        if (colorIndex === 0 && (gridId === "original-board" || gridId === "output-board")) {
+            cell.style.backgroundColor = "#ffdae9"; 
+        } else {
+            cell.style.backgroundColor = colors[colorIndex] || "rgba(255,255,255,0.05)";
+        }
+        
+        // 📝 記号のみ表示
+        let text = "";
+        if (isPlus) text += "+";
+        if (isBonus) text += "B";
+        cell.textContent = text;
+    }
+
+    function updateUITrace(row, col, colorIndex) {
+        const colorCodes = ["#ccc", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ff3eff"];
+        const target = document.getElementById('trace-result');
+        const colorCode = colorCodes[colorIndex] || "#fff";
+
+        target.innerHTML = `
+            ${row} 行 ${col} 列 
+            <span style="color: ${colorCode}; margin-left: 12px; font-size: 1.2em; text-shadow: 0 0 10px ${colorCode};">●</span>
+        `;
     }
 </script>
 </body>
