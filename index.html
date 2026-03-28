@@ -1,21 +1,32 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ぷよクエ解析シミュレータ</title>
+    <title>ぷよクエ解析シミュレーター</title>
     <style>
-        /* CSS部分は変更なしのため維持 */
+        /* 基本デザイン */
         body { background: linear-gradient(135deg, #2c3e50 0%, #000000 100%); color: white; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 20px; line-height: 1.3; min-height: 100vh; }
         h1 { color: #f1c40f; text-shadow: 2px 2px #d35400; font-size: 1.8em; text-align: center; margin-bottom: 20px; }
         .usage-section { background-color: rgba(52, 73, 94, 0.8); padding: 15px; border-radius: 10px; border-left: 6px solid #f1c40f; max-width: 1400px; margin: 0 auto 20px auto; font-size: 0.85em; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .wrapper { display: flex; gap: 30px; justify-content: center; max-width: 1800px; margin: 0 auto; align-items: flex-start; }
+        
+        /* サイド入力エリア */
         .side-input { flex: 0 0 380px; background-color: #34495e; padding: 15px; border-radius: 10px; border: 1px solid #7f8c8d; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(12, 1fr); grid-auto-flow: column; column-gap: 20px; row-gap: 6px; }
         .input-row { display: flex; align-items: center; justify-content: space-between; }
         .input-label { width: 75px; text-align: right; margin-right: 8px; font-size: 11px; color: #bdc3c7; white-space: nowrap; }
         .input-field { width: 85px; height: 22px; font-size: 13px; text-align: center; border-radius: 4px; border: 1px solid #bdc3c7; background: #ecf0f1; }
+        
+        /* 🚀 最高得点表示エリア（入力の下） */
+        .best-score-container { 
+            margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; 
+            border: 2px solid #f1c40f; text-align: center; box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.2);
+        }
+        .best-score-label { font-size: 0.8em; color: #f1c40f; font-weight: bold; margin-bottom: 5px; }
+        .best-score-value { font-size: 2em; font-weight: bold; color: #fff; text-shadow: 0 0 10px #f1c40f; font-family: 'Courier New', monospace; }
+
+        /* メイン表示エリア */
         .main-display { display: flex; flex-direction: column; gap: 25px; }
         .display-row { display: flex; gap: 25px; align-items: flex-end; }
         .board-wrapper { text-align: center; display: flex; flex-direction: column; align-items: flex-start; }
@@ -32,10 +43,13 @@
         #trace-result { font-size: 1.3em; font-weight: bold; color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
         .btn { background: linear-gradient(to bottom, #e74c3c, #c0392b); color: white; padding: 12px; border: none; border-radius: 30px; cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px #952d23; }
         .btn:active { transform: translateY(2px); box-shadow: 0 2px #952d23; }
-        .stats-container { max-width: 1400px; margin: 40px auto 10px auto; display: flex; gap: 20px; justify-content: space-between; }
-        .stat-card { flex: 1; background-color: #34495e; padding: 15px; border-radius: 10px; border-bottom: 3px solid #3498db; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+
+        /* 統計コンテナ */
+        .stats-container { max-width: 1000px; margin: 40px auto 10px auto; display: flex; gap: 20px; justify-content: center; }
+        .stat-card { flex: 1; max-width: 400px; background-color: #34495e; padding: 15px; border-radius: 10px; border-bottom: 3px solid #3498db; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .stat-label { font-size: 0.8em; color: #bdc3c7; margin-bottom: 5px; font-weight: bold; }
         .stat-value { font-size: 1.6em; font-weight: bold; color: #3498db; font-family: 'Courier New', Courier, monospace; }
+
         .comment-section { max-width: 1400px; margin: 40px auto; background-color: #34495e; padding: 25px; border-radius: 12px; }
         .comment-textarea { width: 100%; height: 60px; border-radius: 6px; border: 1px solid #7f8c8d; padding: 10px; box-sizing: border-box; margin: 15px 0; }
         .submit-btn { background-color: #3498db; color: white; border: none; padding: 10px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; }
@@ -46,14 +60,19 @@
     <h1> ぷよクエ解析シミュレーター </h1>
 
     <div class="usage-section">
-        <strong>💡 統計システム稼働状況</strong><br>
-        数値が0のまま動かない場合は、Firebaseの「ルール」が許可されているか確認してください。
+        <strong>💡 解析結果の確認</strong><br>
+        最高得点は入力エリアのすぐ下にリアルタイムで表示されます。
     </div>
 
     <div class="wrapper">
         <div class="side-input">
             <div id="input-section" class="input-grid"></div>
             <button class="btn" onclick="startSearch()">🚀 探索開始</button>
+            
+            <div class="best-score-container">
+                <div class="best-score-label">今回の最高得点</div>
+                <div id="best-score-display" class="best-score-value">0</div>
+            </div>
         </div>
 
         <div class="main-display">
@@ -83,9 +102,8 @@
     </div>
 
     <div class="stats-container">
-        <div class="stat-card"><div class="stat-label">来場者数</div><div id="visitor-count" class="stat-value">0</div></div>
-        <div class="stat-card"><div class="stat-label">総探索回数</div><div id="total-execs" class="stat-value">0</div></div>
-        <div class="stat-card"><div class="stat-label">総探索パターン数</div><div id="total-patterns" class="stat-value">0</div></div>
+        <div class="stat-card"><div class="stat-label">あなたの総探索回数</div><div id="total-execs" class="stat-value">0</div></div>
+        <div class="stat-card"><div class="stat-label">あなたの総探索パターン数</div><div id="total-patterns" class="stat-value">0</div></div>
     </div>
 
     <div class="comment-section">
@@ -98,7 +116,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
 
 <script>
-    // 1. Firebase 初期設定
+    // Firebase初期化
     const firebaseConfig = {
         apiKey: "AIzaSyBxMptE0LD0sBSbJq1D3YHaM0hy36zu05g",
         authDomain: "puyo-logic-stats.firebaseapp.com",
@@ -112,35 +130,30 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-
-    // 💡 接続を強制的に確立させる（アジアサーバーで有効な設定）
+    db.setForceWebSockets(true);
     db.goOnline();
 
     const inputLabels = ["盤面行 1:", "盤面行 2:", "盤面行 3:", "盤面行 4:", "盤面行 5:", "盤面行 6:", "+行 1:", "+行 2:", "+行 3:", "+行 4:", "+行 5:", "+行 6:", "BE行 1:", "BE行 2:", "BE行 3:", "BE行 4:", "BE行 5:", "BE行 6:", "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間:", "未設定:"];
     const placeholderHints = ["13121232", "25241231", "21545231", "45512452", "44132442", "35545511", "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", "11111111", "11111111", "12", "12", "2", "0"];
 
+    let myExecs = parseInt(localStorage.getItem('puyo_my_execs')) || 0;
+    let myPatterns = parseInt(localStorage.getItem('puyo_my_patterns')) || 0;
+
+    function updateStatsUI() {
+        document.getElementById('total-execs').textContent = myExecs.toLocaleString();
+        document.getElementById('total-patterns').textContent = myPatterns.toLocaleString();
+    }
+
+    // 🚀 最高得点を更新する関数（C言語のEM_ASMから呼ばれます）
+    window.updateBestScore = function(score) {
+        const display = document.getElementById('best-score-display');
+        display.textContent = score.toLocaleString();
+        // 演出：高得点の時に色を一時的に変えるなど
+        display.style.color = score > 150 ? "#f1c40f" : "#fff";
+    };
+
     window.addEventListener('DOMContentLoaded', () => {
-        // --- 📊 全統計のリアルタイム受信 ---
-        db.ref('puyo_stats').on('value', (snapshot) => {
-            const data = snapshot.val();
-            console.log("🔥 Firebase Data Received:", data); // デバッグ用
-            if (data) {
-                document.getElementById('visitor-count').textContent = (data.visitors || 0).toLocaleString();
-                document.getElementById('total-execs').textContent = (data.execs || 0).toLocaleString();
-                document.getElementById('total-patterns').textContent = (data.patterns || 0).toLocaleString();
-            }
-        }, (error) => {
-            console.error("❌ Firebase Read Error:", error);
-        });
-
-        // --- 🚀 来場者数の加算（セッション中1回） ---
-        if (!sessionStorage.getItem('puyo_visited')) {
-            db.ref('puyo_stats/visitors').set(firebase.database.ServerValue.increment(1))
-              .then(() => sessionStorage.setItem('puyo_visited', 'true'))
-              .catch(e => console.error("❌ Visitor Count Error:", e));
-        }
-
-        // 初期UI生成
+        updateStatsUI(); 
         const inputSection = document.getElementById('input-section');
         for (let i = 0; i < 24; i++) {
             const rowDiv = document.createElement('div');
@@ -148,7 +161,6 @@
             rowDiv.innerHTML = `<label class="input-label">${inputLabels[i]}</label><input type="text" maxlength="8" class="input-field" placeholder="${placeholderHints[i]}">`;
             inputSection.appendChild(rowDiv);
         }
-
         const nextRow = document.getElementById('next-puyo-row');
         for (let i = 0; i < 8; i++) {
             const cell = document.createElement('div');
@@ -156,7 +168,6 @@
             cell.className = 'next-puyo-cell';
             nextRow.appendChild(cell);
         }
-
         createExcelGrid('original-board');
         createExcelGrid('output-board');
         createExcelGrid('repaint-board-1');
@@ -178,28 +189,29 @@
     }
 
     function startSearch() {
-        // 探索回数をインクリメント
-        db.ref('puyo_stats/execs').set(firebase.database.ServerValue.increment(1));
-        
+        myExecs++;
+        localStorage.setItem('puyo_my_execs', myExecs);
+        updateStatsUI();
+        // 探索開始時にスコアをリセット
+        document.getElementById('best-score-display').textContent = "探索中...";
+
         const inputs = document.querySelectorAll('.input-field');
         const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
-
         const nextColorsStr = (inputs[18].value || placeholderHints[18]).padStart(8, '1');
         const nextPlusStr = (inputs[19].value || placeholderHints[19]).padStart(8, '0');
         for (let i = 0; i < 8; i++) {
             const cell = document.getElementById(`next-cell-${i}`);
-            if (!cell) continue;
-            const colorIdx = parseInt(nextColorsStr[i]) || 0;
-            cell.style.backgroundColor = colors[colorIdx];
-            cell.textContent = nextPlusStr[i] === "1" ? "+" : "";
+            if (cell) {
+                const colorIdx = parseInt(nextColorsStr[i]) || 0;
+                cell.style.backgroundColor = colors[colorIdx];
+                cell.textContent = nextPlusStr[i] === "1" ? "+" : "";
+            }
         }
-
         let n = 0;
         const combinedData = Array.from(inputs).map(i => {
             let val = i.value || placeholderHints[n++];
             return val.padStart(8, '0');
         }).join(",");
-
         if (typeof Module !== 'undefined' && Module.ccall) {
             Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
         }
@@ -207,7 +219,9 @@
 
     window.addPatternCount = function(count) {
         if (!count || isNaN(count)) return;
-        db.ref('puyo_stats/patterns').set(firebase.database.ServerValue.increment(Number(count)));
+        myPatterns += Number(count);
+        localStorage.setItem('puyo_my_patterns', myPatterns);
+        updateStatsUI();
     };
 
     window.updateUICell = function(gridId, index, colorIndex, isPlus = 0, isBonus = 0) {
