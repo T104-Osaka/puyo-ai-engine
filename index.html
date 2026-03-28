@@ -170,8 +170,8 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js" crossorigin="anonymous"></script>
 
 <script>
     // =========================================
@@ -190,6 +190,7 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    db.getDatabase().setForceWebSockets(true);
 
     // =========================================
     // 2. グローバル変数と初期化処理 (UI生成)
