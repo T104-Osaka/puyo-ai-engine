@@ -8,7 +8,7 @@
         /* 基本設定 */
         body { 
             background: linear-gradient(135deg, #2c3e50 0%, #000000 100%); 
-            color: white; font-family: 'Helvetica Neue', Arial, sans-serif; 
+            color: white; font-family: sans-serif; 
             margin: 0; padding: 20px; line-height: 1.3; min-height: 100vh;
         }
         h1 { color: #f1c40f; text-shadow: 2px 2px #d35400; font-size: 1.8em; text-align: center; margin-bottom: 20px; }
@@ -17,7 +17,6 @@
         .usage-section {
             background-color: rgba(52, 73, 94, 0.8); padding: 15px; border-radius: 10px; border-left: 6px solid #f1c40f;
             max-width: 1400px; margin: 0 auto 20px auto; text-align: left; font-size: 0.85em;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
         /* 2. メインレイアウト */
@@ -30,31 +29,32 @@
             align-items: flex-start; 
         }
 
-        /* 左側：入力エリア (2列にするために幅を広げました) */
+        /* 左側：入力エリア (2列対応) */
         .side-input { 
-            flex: 0 0 360px; /* 幅を約360pxに拡大 */
+            flex: 0 0 380px; 
             background-color: #34495e; padding: 15px; border-radius: 10px; 
             border: 1px solid #7f8c8d; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        /* 入力欄を2列に並べるコンテナ */
+        /* ★ 縦に12個並べてから2列目に行く魔法の設定 ★ */
         .input-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr; /* 均等に2列 */
-            column-gap: 15px;
-            row-gap: 5px;
+            grid-template-columns: 1fr 1fr;   /* 2列 */
+            grid-template-rows: repeat(12, 1fr); /* 12行作る */
+            grid-auto-flow: column;           /* 縦方向に埋めていく */
+            column-gap: 20px;
+            row-gap: 6px;
         }
         
-        /* 入力行の設定 */
         .input-row { display: flex; align-items: center; justify-content: space-between; }
-        .input-label { width: 65px; text-align: right; margin-right: 5px; font-size: 10px; color: #bdc3c7; white-space: nowrap; overflow: hidden; }
-        .input-field { width: 75px; height: 20px; font-size: 12px; text-align: center; border-radius: 3px; border: 1px solid #bdc3c7; background: #ecf0f1; }
+        .input-label { width: 70px; text-align: right; margin-right: 8px; font-size: 11px; color: #bdc3c7; white-space: nowrap; }
+        .input-field { width: 85px; height: 22px; font-size: 13px; text-align: center; border-radius: 4px; border: 1px solid #bdc3c7; background: #ecf0f1; }
 
         /* 表示エリア全体のコンテナ */
         .main-display { display: flex; flex-direction: column; gap: 30px; }
-        .display-row { display: flex; gap: 30px; align-items: flex-start; justify-content: flex-start; }
+        .display-row { display: flex; gap: 40px; align-items: flex-start; justify-content: flex-start; }
 
-        /* 盤面エリア */
+        /* 盤面エリア (Excelスタイル) */
         .board-wrapper { text-align: center; }
         .board-title { font-size: 0.9em; color: #ecf0f1; margin-bottom: 6px; border-left: 4px solid #3498db; padding-left: 8px; text-align: left; font-weight: bold; }
         .board-container { 
@@ -64,24 +64,23 @@
         
         .grid { display: grid; grid-template-columns: 45px repeat(8, 32px); gap: 3px; }
         .cell { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 10px; }
-        .data-cell { background-color: rgba(236, 240, 241, 0.05); border-radius: 50%; border: 1px solid rgba(127, 140, 141, 0.4); color: rgba(255,255,255,0.15); }
+        .data-cell { background-color: rgba(236, 240, 241, 0.05); border-radius: 50%; border: 1px solid rgba(127, 140, 141, 0.4); }
         .header-cell { color: #f1c40f; font-weight: bold; background-color: rgba(0,0,0,0.4); border-radius: 4px; }
         .origin-cell { width: 45px; font-size: 11px; color: #bdc3c7; background-color: rgba(0,0,0,0.5); }
 
         /* なぞり消し結果ボックス */
         .side-result { 
-            width: 250px; background-color: #34495e; padding: 15px; border-radius: 10px; border: 2px solid #1abc9c; 
+            width: 250px; background-color: #34495e; padding: 20px; border-radius: 10px; border: 2px solid #1abc9c; 
             box-shadow: 0 0 20px rgba(26, 188, 156, 0.3); align-self: stretch; display: flex; flex-direction: column; justify-content: center;
         }
-        .result-title { font-size: 0.9em; color: #1abc9c; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1abc9c; padding-bottom: 5px; }
+        .result-title { font-size: 0.9em; color: #1abc9c; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #1abc9c; padding-bottom: 5px; }
         .result-box { font-size: 1.5em; font-weight: bold; color: #fff; background: linear-gradient(to bottom, #1abc9c, #16a085); padding: 15px 5px; border-radius: 6px; text-align: center; }
 
         /* コメント欄 */
         .comment-section { max-width: 1400px; margin: 50px auto; background-color: #34495e; padding: 25px; border-radius: 12px; text-align: left; }
         .comment-textarea { width: 100%; height: 80px; border-radius: 6px; border: 1px solid #7f8c8d; padding: 12px; box-sizing: border-box; margin: 15px 0; }
         
-        .btn { background: linear-gradient(to bottom, #e74c3c, #c0392b); color: white; padding: 12px; border: none; border-radius: 30px; cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px #952d23; }
-        .btn:active { transform: translateY(2px); box-shadow: 0 2px #952d23; }
+        .btn { background: linear-gradient(to bottom, #e74c3c, #c0392b); color: white; padding: 12px; border: none; border-radius: 30px; cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold; font-size: 1.1em; }
         .submit-btn { background-color: #3498db; color: white; border: none; padding: 10px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
@@ -91,7 +90,7 @@
 
     <div class="usage-section">
         <strong>💡 使い方ガイド</strong><br>
-        左側の入力欄に各行のデータと設定値を入力し、「探索開始」ボタンを押してください。
+        左側の入力欄に各行のデータ(1-12)と設定値(13-24)を入力してください。
     </div>
 
     <div class="wrapper">
@@ -140,13 +139,12 @@
     </div>
 
     <script>
-        // ★ 24個のラベルを設定 ★
+        // ★ 24個のラベル（縦に12個並んでから2列目へ行きます） ★
         const inputLabels = [
             "行 1:", "行 2:", "行 3:", "行 4:", "行 5:", "行 6:", 
-            "初期消し:", "同時消し:", "設定 9:", "設定 10:",
-            "設定 11:", "設定 12:", "設定 13:", "設定 14:", "設定 15:",
-            "設定 16:", "設定 17:", "設定 18:", "設定 19:", "設定 20:",
-            "設定 21:", "設定 22:", "設定 23:", "設定 24:"
+            "初期消し:", "同時消し:", "設定 9:", "設定 10:", "設定 11:", "設定 12:", 
+            "設定 13:", "設定 14:", "設定 15:", "設定 16:", "設定 17:", "設定 18:", 
+            "設定 19:", "設定 20:", "設定 21:", "設定 22:", "設定 23:", "設定 24:"
         ];
 
         const inputSection = document.getElementById('input-section');
