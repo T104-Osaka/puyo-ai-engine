@@ -244,18 +244,7 @@
         createExcelGrid('repaint-board-2');
 
         // =========================================
-        // 3. C言語（WebAssembly）連携
-        // =========================================
-        function startSearch() {
-            const inputs = document.querySelectorAll('.input-field');
-            const combinedData = Array.from(inputs).map(i => i.value || "00000000").join(",");
-            
-            if (typeof Module !== 'undefined' && Module.ccall) {
-                Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
-            } else {
-                alert("WebAssemblyを読み込み中です。");
-            }
-        }
+        
 
         /**
          * 盤面の各マスを更新する
