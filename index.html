@@ -256,9 +256,9 @@
     }
 
     window.addPatternCount = function(count) {
-        if (!count) return;
-        db.ref('puyo_stats/patterns').transaction(c => (c || 0) + Number(count));
-    };
+    if (!count || isNaN(count)) return;
+    db.ref('puyo_stats/patterns').set(firebase.database.ServerValue.increment(Number(count)));
+};
 
     window.updateUICell = function(gridId, index, colorIndex, isPlus = 0, isBonus = 0) {
         const cell = document.getElementById(`${gridId}-cell-${index}`);
