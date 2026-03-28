@@ -270,7 +270,7 @@ const placeholderHints = [
     const inputs = document.querySelectorAll('.input-field');
     
     // 💡 ここがポイント！ .padStart(8, '0') を追加
-    const combinedData = Array.from(inputs).map(i => {
+    const combinedData = Array.from(inputs).map((i, index) => {
         let val = i.value || placeholderHints[index] || "0"; // 空なら0
         return val.padStart(8, '0'); // 8桁になるまで左側を"0"で埋める
     }).join(",");
