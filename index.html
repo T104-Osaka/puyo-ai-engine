@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ぷよクエ解析シミュレーター</title>
+    <style>
+        /* ここで「見た目」を調整します */
+        body { background-color: #2c3e50; color: white; font-family: sans-serif; text-align: center; }
+        h1 { color: #f1c40f; text-shadow: 2px 2px #d35400; margin-top: 30px; }
+        
+        .board-container {
+            background-color: #34495e;
+            display: inline-block;
+            padding: 15px;
+            border: 5px solid #7f8c8d;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(8, 45px); /* 8列 */
+            gap: 4px;
+        }
+
+        /* 枠の見た目 */
+        .cell {
+            width: 45px;
+            height: 45px;
+            background-color: #ecf0f1;
+            border-radius: 50%; /* 丸くする */
+            border: none;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 5px #c0392b;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 2px #c0392b; }
+    </style>
+</head>
+<body>
+
+    <h1>🔥 ぷよクエ最強解析ツール 🔥</h1>
+    <p>盤面の数字(0-5)を入力してください</p>
+
+    <div class="board-container">
+        <div id="board" class="grid">
+            </div>
+    </div>
+
+    <br>
+    <button class="btn">🚀 探索を開始する</button>
+
+    <script>
+        // 48個の入力枠を作る
+        const board = document.getElementById('board');
+        for (let i = 0; i < 48; i++) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.maxLength = 1;
+            input.className = 'cell';
+            // 初期値として数字を入れておく
+            input.value = "0";
+            board.appendChild(input);
+        }
+    </script>
+</body>
+</html>
