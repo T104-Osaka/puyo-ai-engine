@@ -6,64 +6,58 @@
     <title>ぷよクエ解析シミュレーター</title>
     <style>
         /* 基本設定 */
-        body { background-color: #2c3e50; color: white; font-family: sans-serif; margin: 0; padding: 10px; line-height: 1.6; }
-        h1 { color: #f1c40f; text-shadow: 1px 1px #d35400; font-size: 1.8em; text-align: center; margin-bottom: 20px; }
+        body { background-color: #2c3e50; color: white; font-family: sans-serif; margin: 0; padding: 10px; line-height: 1.4; }
+        h1 { color: #f1c40f; text-shadow: 1px 1px #d35400; font-size: 1.6em; text-align: center; margin-bottom: 15px; }
 
-        /* =========================================
-           1. 使い方の説明エリア (上)
-           ========================================= */
+        /* 1. 上部：使い方の説明エリア */
         .usage-section {
-            background-color: #34495e; padding: 15px; border-radius: 10px; border-left: 10px solid #f1c40f;
-            max-width: 900px; margin: 0 auto 20px auto; text-align: left;
+            background-color: #34495e; padding: 12px; border-radius: 8px; border-left: 6px solid #f1c40f;
+            max-width: 1100px; margin: 0 auto 15px auto; text-align: left; font-size: 0.9em;
         }
-        .usage-section h2 { font-size: 1.1em; margin-top: 0; color: #f1c40f; }
 
-        /* =========================================
-           2. メインレイアウト (左入力 / 右盤面)
-           ========================================= */
-        .wrapper { display: flex; gap: 20px; align-items: flex-start; justify-content: center; max-width: 1000px; margin: 0 auto; }
+        /* 2. メインレイアウト */
+        .wrapper { display: flex; gap: 15px; justify-content: center; max-width: 1200px; margin: 0 auto; }
 
-        /* 左側：入力エリア (約30%) */
-        .side-input { flex: 0 0 250px; background-color: #34495e; padding: 10px; border-radius: 8px; border: 2px solid #7f8c8d; }
+        /* 左側：入力エリア (15%想定) */
+        .side-input { flex: 0 0 180px; background-color: #34495e; padding: 8px; border-radius: 6px; border: 1px solid #7f8c8d; }
         
-        /* 右側：表示エリア (残り) */
-        .main-display { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        /* 右側：表示エリア */
+        .main-display { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 15px; }
 
-        /* 入力行の微調整 */
-        .input-row { display: flex; align-items: center; margin-bottom: 4px; }
-        .input-label { width: 50px; text-align: right; margin-right: 10px; font-size: 12px; color: #bdc3c7; }
+        /* 入力行の設定 (さらにコンパクトに) */
+        .input-row { display: flex; align-items: center; margin-bottom: 3px; }
+        .input-label { width: 70px; text-align: right; margin-right: 8px; font-size: 10px; color: #bdc3c7; white-space: nowrap; overflow: hidden; }
         .input-field {
-            width: 120px; height: 22px; font-size: 14px; letter-spacing: 2px;
-            text-align: center; border-radius: 3px; border: 1px solid #bdc3c7;
+            width: 85px; height: 18px; font-size: 12px; letter-spacing: 1px;
+            text-align: center; border-radius: 2px; border: 1px solid #bdc3c7;
         }
 
-        /* 盤面エリア */
-        .board-wrapper { margin-bottom: 20px; text-align: center; }
-        .board-title { font-size: 0.9em; color: #ecf0f1; margin-bottom: 5px; border-left: 4px solid #3498db; padding-left: 8px; text-align: left; }
-        .board-container { background-color: #34495e; padding: 8px; border-radius: 8px; border: 2px solid #7f8c8d; display: inline-block; }
-        .grid { display: grid; grid-template-columns: repeat(8, 30px); gap: 2px; }
+        /* 盤面エリア共通 */
+        .board-wrapper { text-align: center; }
+        .board-title { font-size: 0.85em; color: #ecf0f1; margin-bottom: 4px; border-left: 4px solid #3498db; padding-left: 6px; text-align: left; }
+        .board-container { background-color: #34495e; padding: 6px; border-radius: 6px; border: 1px solid #7f8c8d; display: inline-block; }
+        .grid { display: grid; grid-template-columns: repeat(8, 28px); gap: 2px; }
         .cell {
-            width: 30px; height: 30px; background-color: rgba(236, 240, 241, 0.1);
+            width: 28px; height: 28px; background-color: rgba(236, 240, 241, 0.1);
             border-radius: 50%; border: 1px solid rgba(127, 140, 141, 0.3);
-            display: flex; align-items: center; justify-content: center; font-size: 9px; color: rgba(255,255,255,0.3);
+            display: flex; align-items: center; justify-content: center; font-size: 8px; color: rgba(255,255,255,0.2);
         }
+
+        /* 下段の塗り替え盤面を横に並べるためのコンテナ */
+        .repaint-row { display: flex; gap: 20px; justify-content: center; width: 100%; }
 
         .btn {
-            background-color: #e74c3c; color: white; padding: 10px 20px; border: none; border-radius: 25px;
-            font-size: 1em; cursor: pointer; width: 100%; margin-top: 10px; box-shadow: 0 3px #c0392b;
+            background-color: #e74c3c; color: white; padding: 8px; border: none; border-radius: 20px;
+            font-size: 0.9em; cursor: pointer; width: 100%; margin-top: 8px; box-shadow: 0 3px #c0392b;
         }
         .btn:active { transform: translateY(2px); box-shadow: 0 1px #c0392b; }
 
-        /* =========================================
-           3. コメントエリア (下)
-           ========================================= */
+        /* 3. 下部：コメントエリア */
         .comment-section {
-            background-color: #34495e; padding: 20px; border-radius: 10px;
-            max-width: 900px; margin: 40px auto 20px auto; text-align: left;
+            background-color: #34495e; padding: 15px; border-radius: 8px;
+            max-width: 1100px; margin: 30px auto 10px auto; text-align: left;
         }
-        .comment-section h2 { font-size: 1.1em; color: #3498db; border-bottom: 1px solid #7f8c8d; padding-bottom: 10px; }
-        .comment-box { width: 100%; height: 80px; margin: 10px 0; border-radius: 5px; border: 1px solid #bdc3c7; padding: 10px; box-sizing: border-box; }
-        .comment-submit { background-color: #3498db; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; }
+        .comment-box { width: 100%; height: 60px; margin: 8px 0; border-radius: 4px; border: 1px solid #bdc3c7; padding: 8px; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -71,9 +65,8 @@
     <h1>🔥 ぷよクエ解析ツール 🔥</h1>
 
     <div class="usage-section">
-        <h2>💡 使い方ガイド</h2>
-        <p>ここに説明文を入力してください。<br>
-           （例：左の入力欄に数値を入れ、探索開始ボタンを押すと解析が始まります。）</p>
+        <strong>💡 使い方ガイド</strong><br>
+        ここに説明文を入力してください。
     </div>
 
     <div class="wrapper">
@@ -87,35 +80,48 @@
                 <div class="board-title">出力盤面 (結果)</div>
                 <div class="board-container"><div id="output-board" class="grid"></div></div>
             </div>
-            <div class="board-wrapper">
-                <div class="board-title">塗り替え盤面 1</div>
-                <div class="board-container"><div id="repaint-board-1" class="grid"></div></div>
-            </div>
-            <div class="board-wrapper">
-                <div class="board-title">塗り替え盤面 2</div>
-                <div class="board-container"><div id="repaint-board-2" class="grid"></div></div>
+
+            <div class="repaint-row">
+                <div class="board-wrapper">
+                    <div class="board-title">塗り替え盤面 1</div>
+                    <div class="board-container"><div id="repaint-board-1" class="grid"></div></div>
+                </div>
+                <div class="board-wrapper">
+                    <div class="board-title">塗り替え盤面 2</div>
+                    <div class="board-container"><div id="repaint-board-2" class="grid"></div></div>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="comment-section">
-        <h2>💬 コメント・掲示板</h2>
-        <p>ここに説明文を入力（例：バグ報告や要望などはこちらへ）</p>
+        <strong>💬 コメント・掲示板</strong><br>
+        ここに説明文を入力（例：バグ報告など）
         <textarea class="comment-box" placeholder="コメントを入力..."></textarea>
-        <button class="comment-submit">送信する</button>
+        <button style="background-color: #3498db; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer;">送信</button>
     </div>
 
     <script>
-        // 入力エリア生成
+        // ==========================================================
+        // ★ ここを書き換えると、左側の説明文が変わります ★
+        // ==========================================================
+        const inputLabels = [
+            "行 1:", "行 2:", "行 3:", "行 4:", "行 5:", 
+            "行 6:", "設定A:", "設定B:", "設定C:", "設定D:",
+            "項目11:", "項目12:", "項目13:", "項目14:", "項目15:",
+            "項目16:", "項目17:", "項目18:", "項目19:", "項目20:"
+        ];
+
         const inputSection = document.getElementById('input-section');
-        for (let i = 1; i <= 20; i++) {
+        for (let i = 0; i < 20; i++) {
             const rowDiv = document.createElement('div');
             rowDiv.className = 'input-row';
-            rowDiv.innerHTML = `<label class="input-label">行 ${i}:</label><input type="text" maxlength="8" class="input-field" placeholder="00000000">`;
+            // 配列からラベルを取得して表示
+            rowDiv.innerHTML = `<label class="input-label">${inputLabels[i]}</label><input type="text" maxlength="8" class="input-field" placeholder="00000000">`;
             inputSection.appendChild(rowDiv);
         }
 
-        // 盤面生成
+        // 盤面生成 (6x8 = 48マス)
         function createGrid(gridId) {
             const grid = document.getElementById(gridId);
             for (let i = 0; i < 48; i++) {
