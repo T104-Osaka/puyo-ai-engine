@@ -5,59 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ぷよクエ解析シミュレーター</title>
     <style>
-        /* 基本設定 */
         body { background-color: #2c3e50; color: white; font-family: sans-serif; margin: 0; padding: 10px; line-height: 1.4; }
-        h1 { color: #f1c40f; text-shadow: 1px 1px #d35400; font-size: 1.6em; text-align: center; margin-bottom: 15px; }
+        h1 { color: #f1c40f; text-shadow: 1px 1px #d35400; font-size: 1.6em; text-align: center; margin-bottom: 10px; }
 
         /* 1. 上部：使い方の説明エリア */
         .usage-section {
             background-color: #34495e; padding: 12px; border-radius: 8px; border-left: 6px solid #f1c40f;
-            max-width: 1100px; margin: 0 auto 15px auto; text-align: left; font-size: 0.9em;
+            max-width: 1200px; margin: 0 auto 15px auto; text-align: left; font-size: 0.85em;
         }
 
         /* 2. メインレイアウト */
-        .wrapper { display: flex; gap: 15px; justify-content: center; max-width: 1200px; margin: 0 auto; }
+        .wrapper { display: flex; gap: 20px; justify-content: center; max-width: 1300px; margin: 0 auto; }
 
         /* 左側：入力エリア (15%想定) */
-        .side-input { flex: 0 0 180px; background-color: #34495e; padding: 8px; border-radius: 6px; border: 1px solid #7f8c8d; }
+        .side-input { flex: 0 0 170px; background-color: #34495e; padding: 8px; border-radius: 6px; border: 1px solid #7f8c8d; }
         
         /* 右側：表示エリア */
-        .main-display { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .main-display { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 20px; }
 
-        /* 入力行の設定 (さらにコンパクトに) */
+        /* 入力行の設定 */
         .input-row { display: flex; align-items: center; margin-bottom: 3px; }
-        .input-label { width: 70px; text-align: right; margin-right: 8px; font-size: 10px; color: #bdc3c7; white-space: nowrap; overflow: hidden; }
-        .input-field {
-            width: 85px; height: 18px; font-size: 12px; letter-spacing: 1px;
-            text-align: center; border-radius: 2px; border: 1px solid #bdc3c7;
-        }
+        .input-label { width: 65px; text-align: right; margin-right: 8px; font-size: 10px; color: #bdc3c7; }
+        .input-field { width: 80px; height: 18px; font-size: 11px; text-align: center; border-radius: 2px; border: 1px solid #bdc3c7; }
 
-        /* 盤面エリア共通 */
+        /* 盤面エリア（Excel風ヘッダー対応） */
         .board-wrapper { text-align: center; }
         .board-title { font-size: 0.85em; color: #ecf0f1; margin-bottom: 4px; border-left: 4px solid #3498db; padding-left: 6px; text-align: left; }
-        .board-container { background-color: #34495e; padding: 6px; border-radius: 6px; border: 1px solid #7f8c8d; display: inline-block; }
-        .grid { display: grid; grid-template-columns: repeat(8, 28px); gap: 2px; }
+        .board-container { background-color: #34495e; padding: 5px; border-radius: 4px; border: 1px solid #7f8c8d; display: inline-block; }
+        
+        /* 9列(ラベル1 + データ8) x 7行(ラベル1 + データ6) のグリッド */
+        .grid { display: grid; grid-template-columns: 40px repeat(8, 30px); gap: 2px; }
+        
+        /* セルの基本スタイル */
         .cell {
-            width: 28px; height: 28px; background-color: rgba(236, 240, 241, 0.1);
-            border-radius: 50%; border: 1px solid rgba(127, 140, 141, 0.3);
-            display: flex; align-items: center; justify-content: center; font-size: 8px; color: rgba(255,255,255,0.2);
+            width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 9px;
+        }
+        /* データセル（丸い枠） */
+        .data-cell {
+            background-color: rgba(236, 240, 241, 0.1); border-radius: 50%; border: 1px solid rgba(127, 140, 141, 0.3); color: rgba(255,255,255,0.2);
+        }
+        /* ヘッダーセル（行列番号） */
+        .header-cell {
+            width: 30px; color: #f1c40f; font-weight: bold; background-color: rgba(0,0,0,0.2); border-radius: 3px;
+        }
+        /* 左上の「成分」ラベル用セル */
+        .origin-cell { width: 40px; font-size: 10px; color: #bdc3c7; background-color: rgba(0,0,0,0.3); }
+
+        /* なぞり消し表示エリア */
+        .result-box {
+            background-color: #1abc9c; color: white; padding: 10px 20px; border-radius: 5px;
+            font-weight: bold; font-size: 1.1em; margin-top: 10px; box-shadow: 0 3px #16a085;
         }
 
-        /* 下段の塗り替え盤面を横に並べるためのコンテナ */
-        .repaint-row { display: flex; gap: 20px; justify-content: center; width: 100%; }
+        .repaint-row { display: flex; gap: 30px; justify-content: center; width: 100%; }
 
-        .btn {
-            background-color: #e74c3c; color: white; padding: 8px; border: none; border-radius: 20px;
-            font-size: 0.9em; cursor: pointer; width: 100%; margin-top: 8px; box-shadow: 0 3px #c0392b;
-        }
-        .btn:active { transform: translateY(2px); box-shadow: 0 1px #c0392b; }
-
-        /* 3. 下部：コメントエリア */
-        .comment-section {
-            background-color: #34495e; padding: 15px; border-radius: 8px;
-            max-width: 1100px; margin: 30px auto 10px auto; text-align: left;
-        }
-        .comment-box { width: 100%; height: 60px; margin: 8px 0; border-radius: 4px; border: 1px solid #bdc3c7; padding: 8px; box-sizing: border-box; }
+        .btn { background-color: #e74c3c; color: white; padding: 8px; border: none; border-radius: 20px; cursor: pointer; width: 100%; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -91,49 +93,66 @@
                     <div class="board-container"><div id="repaint-board-2" class="grid"></div></div>
                 </div>
             </div>
+
+            <div class="board-wrapper" style="width: 100%;">
+                <div class="board-title">なぞり消し位置</div>
+                <div class="result-box">
+                    なぞり消し開始：<span id="trace-result">-- 行 -- 列</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="comment-section">
-        <strong>💬 コメント・掲示板</strong><br>
-        ここに説明文を入力（例：バグ報告など）
-        <textarea class="comment-box" placeholder="コメントを入力..."></textarea>
-        <button style="background-color: #3498db; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer;">送信</button>
-    </div>
-
     <script>
-        // ==========================================================
-        // ★ ここを書き換えると、左側の説明文が変わります ★
-        // ==========================================================
+        // 入力ラベルの設定
         const inputLabels = [
-            "行 1:", "行 2:", "行 3:", "行 4:", "行 5:", 
-            "行 6:", "設定A:", "設定B:", "設定C:", "設定D:",
-            "項目11:", "項目12:", "項目13:", "項目14:", "項目15:",
-            "項目16:", "項目17:", "項目18:", "項目19:", "項目20:"
+            "行 1:", "行 2:", "行 3:", "行 4:", "行 5:", "行 6:", "設定1:", "設定2:", "設定3:", "設定4:",
+            "項 11:", "項 12:", "項 13:", "項 14:", "項 15:", "項 16:", "項 17:", "項 18:", "項 19:", "項 20:"
         ];
 
         const inputSection = document.getElementById('input-section');
         for (let i = 0; i < 20; i++) {
             const rowDiv = document.createElement('div');
             rowDiv.className = 'input-row';
-            // 配列からラベルを取得して表示
             rowDiv.innerHTML = `<label class="input-label">${inputLabels[i]}</label><input type="text" maxlength="8" class="input-field" placeholder="00000000">`;
             inputSection.appendChild(rowDiv);
         }
 
-        // 盤面生成 (6x8 = 48マス)
-        function createGrid(gridId) {
+        // Excel風の盤面生成関数
+        function createExcelGrid(gridId) {
             const grid = document.getElementById(gridId);
-            for (let i = 0; i < 48; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                cell.textContent = i;
-                grid.appendChild(cell);
+            for (let r = 0; r <= 6; r++) { // 0行目はヘッダー
+                for (let c = 0; c <= 8; c++) { // 0列目はラベル
+                    const cell = document.createElement('div');
+                    
+                    if (r === 0 && c === 0) {
+                        cell.className = 'cell origin-cell';
+                        cell.textContent = '行\\列';
+                    } else if (r === 0) {
+                        cell.className = 'cell header-cell';
+                        cell.textContent = c; // 列番号 1-8
+                    } else if (c === 0) {
+                        cell.className = 'cell header-cell';
+                        cell.style.width = '40px';
+                        cell.textContent = r; // 行番号 1-6
+                    } else {
+                        cell.className = 'cell data-cell';
+                        cell.id = `${gridId}-cell-${(r-1)*8 + (c-1)}`;
+                        cell.textContent = (r-1)*8 + (c-1); // インデックス
+                    }
+                    grid.appendChild(cell);
+                }
             }
         }
-        createGrid('output-board');
-        createGrid('repaint-board-1');
-        createGrid('repaint-board-2');
+        
+        createExcelGrid('output-board');
+        createExcelGrid('repaint-board-1');
+        createExcelGrid('repaint-board-2');
+
+        // テスト用：なぞり消し位置を書き換える関数 (後でC言語から呼ぶ)
+        function updateTraceResult(n, m) {
+            document.getElementById('trace-result').textContent = `${n} 行 ${m} 列`;
+        }
     </script>
 </body>
 </html>
