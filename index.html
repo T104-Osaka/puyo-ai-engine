@@ -38,17 +38,22 @@
         .input-label { width: 75px; text-align: right; margin-right: 8px; font-size: 11px; color: #bdc3c7; white-space: nowrap; }
         .input-field { width: 85px; height: 22px; font-size: 13px; text-align: center; border-radius: 4px; border: 1px solid #bdc3c7; background: #ecf0f1; }
 
-        /* 右側：解析表示レイアウト */
+        /* 右側：解析表示 */
         .main-display { display: flex; flex-direction: column; gap: 25px; }
         .display-row { display: flex; gap: 25px; align-items: flex-end; }
-
         .board-wrapper { text-align: center; display: flex; flex-direction: column; align-items: flex-start; }
-        .board-title { font-size: 0.85em; color: #ecf0f1; margin-bottom: 6px; border-left: 4px solid #3498db; padding-left: 8px; font-weight: bold; }
-        
-        /* 💡 ネクストぷよ表示行のスタイル */
+
+        /* 💡 タイトルを上に配置 */
+        .board-title { 
+            font-size: 0.85em; color: #ecf0f1; 
+            margin-bottom: 4px; 
+            border-left: 4px solid #3498db; padding-left: 8px; font-weight: bold; 
+        }
+
+        /* 💡 ネクスト行（盤面の8列にピッタリ合わせる） */
         .next-puyo-row {
             display: flex;
-            margin-left: 48px; /* 行番号列(45px)+隙間(3px)分ずらす */
+            margin-left: 48px; /* 行番号(45px) + 隙間(3px) 分ずらす */
             gap: 3px;
             margin-bottom: 8px;
         }
@@ -60,6 +65,8 @@
             border: 1px solid rgba(127, 140, 141, 0.4);
             background-color: rgba(236, 240, 241, 0.05);
             box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+            color: white;
+            text-shadow: 1px 1px 2px #000;
         }
 
         .trace-container {
@@ -97,7 +104,7 @@
 
     <div class="usage-section">
         <strong>💡 使い方ガイド</strong><br>
-        解析エンジン実行中。N盤面は各列のネクスト色、N+はプラスぷよの有無に対応します。
+        解析エンジン稼働中。「N盤面」で列ごとのネクスト色を、「N+」に1を入力することでプラスぷよを指定できます。
     </div>
 
     <div class="wrapper">
@@ -115,9 +122,7 @@
                 </div>
                 
                 <div class="board-wrapper">
-                    <div class="trace-container">
-                        <div id="trace-result">-- 行 -- 列</div>
-                    </div>
+                    <div class="trace-container"><div id="trace-result">-- 行 -- 列</div></div>
                     <div class="board-title">塗り替え後 (解析結果)</div>
                     <div class="board-container"><div id="output-board" class="grid"></div></div>
                 </div>
@@ -137,32 +142,22 @@
     </div>
 
     <div class="stats-container">
-        <div class="stat-card">
-            <div class="stat-label">来場者数</div>
-            <div id="visitor-count" class="stat-value">1</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">総探索回数</div>
-            <div id="total-execs" class="stat-value">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">総探索パターン数</div>
-            <div id="total-patterns" class="stat-value">0</div>
-        </div>
+        <div class="stat-card"><div class="stat-label">来場者数</div><div id="visitor-count" class="stat-value">1</div></div>
+        <div class="stat-card"><div class="stat-label">総探索回数</div><div id="total-execs" class="stat-value">0</div></div>
+        <div class="stat-card"><div class="stat-label">総探索パターン数</div><div id="total-patterns" class="stat-value">0</div></div>
     </div>
 
     <div class="comment-section">
         <div style="font-size: 1.1em; color: #3498db; font-weight: bold;">💬 掲示板 / フィードバック</div>
         <textarea class="comment-textarea" placeholder="メッセージを入力..."></textarea>
-        <div style="text-align: right;">
-            <button class="submit-btn">送信する</button>
-        </div>
+        <div style="text-align: right;"><button class="submit-btn">送信する</button></div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js" crossorigin="anonymous"></script>
 
 <script>
+    // 1. Firebase 初期化
     const firebaseConfig = {
         apiKey: "AIzaSyBxMptE0LD0sBSbJq1D3YHaM0hy36zu05g",
         authDomain: "puyo-logic-stats.firebaseapp.com",
@@ -173,36 +168,25 @@
         appId: "1:369432653847:web:d09f669ac2a8ef4e61ac52",
         measurementId: "G-1GYB847L0E"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const inputLabels = [
-        "盤面行 1:", "盤面行 2:", "盤面行 3:", "盤面行 4:", "盤面行 5:", "盤面行 6:", 
-        "+行 1:", "+行 2:", "+行 3:", "+行 4:", "+行 5:", "+行 6:", 
-        "BE行 1:", "BE行 2:", "BE行 3:", "BE行 4:", "BE行 5:", "BE行 6:", 
-        "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間:", "未設定:"
-    ];
-
-    const placeholderHints = [
-        "13121232", "25241231", "21545231", "45512452", "44132442", "35545511", 
-        "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", 
-        "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", 
-        "11111111", "11111111", "12", "12", "2", "0"
-    ];
+    const inputLabels = ["盤面行 1:", "盤面行 2:", "盤面行 3:", "盤面行 4:", "盤面行 5:", "盤面行 6:", "+行 1:", "+行 2:", "+行 3:", "+行 4:", "+行 5:", "+行 6:", "BE行 1:", "BE行 2:", "BE行 3:", "BE行 4:", "BE行 5:", "BE行 6:", "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間:", "未設定:"];
+    const placeholderHints = ["13121232", "25241231", "21545231", "45512452", "44132442", "35545511", "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", "11111111", "11111111", "12", "12", "2", "0"];
 
     window.addEventListener('DOMContentLoaded', () => {
+        // 統計処理
         let visits = localStorage.getItem('puyo_visits') || 0;
         visits++;
         localStorage.setItem('puyo_visits', visits);
         document.getElementById('visitor-count').textContent = visits.toLocaleString();
-
         db.ref('puyo_stats').on('value', (snapshot) => {
             const data = snapshot.val() || { execs: 0, patterns: 0 };
             document.getElementById('total-execs').textContent = data.execs.toLocaleString();
             document.getElementById('total-patterns').textContent = data.patterns.toLocaleString();
         });
 
+        // 入力欄生成
         const inputSection = document.getElementById('input-section');
         for (let i = 0; i < 24; i++) {
             const rowDiv = document.createElement('div');
@@ -211,7 +195,7 @@
             inputSection.appendChild(rowDiv);
         }
 
-        // 💡 ネクスト行のセルを8つ生成
+        // 💡 ネクストぷよセルの生成
         const nextRow = document.getElementById('next-puyo-row');
         for (let i = 0; i < 8; i++) {
             const cell = document.createElement('div');
@@ -248,24 +232,20 @@
         const inputs = document.querySelectorAll('.input-field');
         const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
 
-        // 💡 ネクスト表示を更新（N盤面とN+から取得）
+        // 💡 ネクスト表示の更新（色とプラス）
         const nextColorsStr = (inputs[18].value || "11111111").padStart(8, '1');
         const nextPlusStr = (inputs[19].value || "00000000").padStart(8, '0');
         for (let i = 0; i < 8; i++) {
             const cell = document.getElementById(`next-cell-${i}`);
             const colorIdx = parseInt(nextColorsStr[i]) || 0;
             cell.style.backgroundColor = colors[colorIdx];
+            // 💡 プラス記号を表示
             cell.textContent = nextPlusStr[i] === "1" ? "+" : "";
         }
 
         let n = 0;
         const combinedData = Array.from(inputs).map(i => {
-            const Hints = [
-                "13121232", "25241231", "21545231", "45512452", "44132442", "35545511", 
-                "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", 
-                "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", 
-                "11111111", "11111111", "12", "12", "2", "0"
-            ];
+            const Hints = ["13121232", "25241231", "21545231", "45512452", "44132442", "35545511", "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", "11111111", "11111111", "12", "12", "2", "0"];
             let val = i.value || Hints[n++];
             return val.padStart(8, '0');
         }).join(",");
@@ -304,6 +284,6 @@
         target.innerHTML = `${row} 行 ${col} 列 <span style="color: ${colorCode}; margin-left: 12px; font-size: 1.2em; text-shadow: 0 0 10px ${colorCode};">●</span>`;
     };
 </script>
-    <script src="puyosim.js"></script>
+<script src="puyosim.js"></script>
 </body>
 </html>
