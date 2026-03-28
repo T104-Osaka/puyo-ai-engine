@@ -5,34 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ぷよクエ解析シミュレーター</title>
     <style>
-        /* デザイン部分は変更ありません */
-        body { background: linear-gradient(135deg, #2c3e50 0%, #000000 100%); color: white; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 20px; line-height: 1.3; min-height: 100vh; }
+        /* =========================================
+           基本デザイン
+           ========================================= */
+        body { 
+            background: linear-gradient(135deg, #2c3e50 0%, #000000 100%); 
+            color: white; font-family: 'Helvetica Neue', Arial, sans-serif; 
+            margin: 0; padding: 20px; line-height: 1.3; min-height: 100vh;
+        }
         h1 { color: #f1c40f; text-shadow: 2px 2px #d35400; font-size: 1.8em; text-align: center; margin-bottom: 20px; }
-        .usage-section { background-color: rgba(52, 73, 94, 0.8); padding: 15px; border-radius: 10px; border-left: 6px solid #f1c40f; max-width: 1400px; margin: 0 auto 20px auto; text-align: left; font-size: 0.85em; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .wrapper { display: flex; gap: 30px; justify-content: center; max-width: 1800px; margin: 0 auto; align-items: flex-start; }
-        .side-input { flex: 0 0 380px; background-color: #34495e; padding: 15px; border-radius: 10px; border: 1px solid #7f8c8d; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(12, 1fr); grid-auto-flow: column; column-gap: 20px; row-gap: 6px; }
+
+        .usage-section {
+            background-color: rgba(52, 73, 94, 0.8); padding: 15px; border-radius: 10px; border-left: 6px solid #f1c40f;
+            max-width: 1400px; margin: 0 auto 20px auto; text-align: left; font-size: 0.85em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .wrapper { 
+            display: flex; gap: 30px; justify-content: center; max-width: 1800px; margin: 0 auto; align-items: flex-start; 
+        }
+
+        /* =========================================
+           左側：入力エリア
+           ========================================= */
+        .side-input { 
+            flex: 0 0 380px; background-color: #34495e; padding: 15px; border-radius: 10px; 
+            border: 1px solid #7f8c8d; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .input-grid {
+            display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(12, 1fr);
+            grid-auto-flow: column; column-gap: 20px; row-gap: 6px;
+        }
         .input-row { display: flex; align-items: center; justify-content: space-between; }
         .input-label { width: 75px; text-align: right; margin-right: 8px; font-size: 11px; color: #bdc3c7; white-space: nowrap; }
         .input-field { width: 85px; height: 22px; font-size: 13px; text-align: center; border-radius: 4px; border: 1px solid #bdc3c7; background: #ecf0f1; }
+
+        /* =========================================
+           右側：2x2 盤面レイアウト
+           ========================================= */
         .main-display { display: flex; flex-direction: column; gap: 25px; }
         .display-row { display: flex; gap: 25px; align-items: flex-end; }
+
         .board-wrapper { text-align: center; display: flex; flex-direction: column; align-items: flex-start; }
         .board-title { font-size: 0.85em; color: #ecf0f1; margin-bottom: 6px; border-left: 4px solid #3498db; padding-left: 8px; font-weight: bold; }
-        .trace-container { width: 100%; min-height: 40px; margin-bottom: 10px; background: rgba(26, 188, 156, 0.2); border: 1px solid #1abc9c; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+        
+        /* 解析結果（右上盤面のすぐ上に配置） */
+        .trace-container {
+            width: 100%; min-height: 40px; margin-bottom: 10px; background: rgba(26, 188, 156, 0.2);
+            border: 1px solid #1abc9c; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+        }
         #trace-result { font-size: 1.3em; font-weight: bold; color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
-        .board-container { background-color: #2c3e50; padding: 8px; border-radius: 8px; border: 2px solid #7f8c8d; display: inline-block; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+
+        .board-container { 
+            background-color: #2c3e50; padding: 8px; border-radius: 8px; border: 2px solid #7f8c8d; 
+            display: inline-block; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
         .grid { display: grid; grid-template-columns: 45px repeat(8, 32px); gap: 3px; }
         .cell { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; position: relative; }
         .data-cell { background-color: rgba(236, 240, 241, 0.05); border-radius: 50%; border: 1px solid rgba(127, 140, 141, 0.4); color: #fff; text-shadow: 1px 1px 2px #000; }
         .header-cell { color: #f1c40f; font-size: 11px; font-weight: bold; background-color: rgba(0,0,0,0.4); border-radius: 4px; }
         .origin-cell { width: 45px; font-size: 10px; color: #bdc3c7; background-color: rgba(0,0,0,0.5); }
+
         .btn { background: linear-gradient(to bottom, #e74c3c, #c0392b); color: white; padding: 12px; border: none; border-radius: 30px; cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px #952d23; }
         .btn:active { transform: translateY(2px); box-shadow: 0 2px #952d23; }
-        .stats-container { max-width: 1400px; margin: 40px auto 10px auto; display: flex; gap: 20px; justify-content: space-between; }
-        .stat-card { flex: 1; background-color: #34495e; padding: 15px; border-radius: 10px; border-bottom: 3px solid #3498db; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .stat-label { font-size: 0.8em; color: #bdc3c7; margin-bottom: 5px; font-weight: bold; }
-        .stat-value { font-size: 1.6em; font-weight: bold; color: #3498db; font-family: 'Courier New', Courier, monospace; }
+
         .comment-section { max-width: 1400px; margin: 40px auto; background-color: #34495e; padding: 25px; border-radius: 12px; text-align: left; }
         .comment-textarea { width: 100%; height: 60px; border-radius: 6px; border: 1px solid #7f8c8d; padding: 10px; box-sizing: border-box; margin: 15px 0; }
         .submit-btn { background-color: #3498db; color: white; border: none; padding: 10px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; }
@@ -44,7 +80,7 @@
 
     <div class="usage-section">
         <strong>💡 使い方ガイド</strong><br>
-        24個の入力欄が空の場合は、表示されているデフォルト値を使用して解析を行います。
+        現在製作中<br>動きません
     </div>
 
     <div class="wrapper">
@@ -81,8 +117,7 @@
             </div>
         </div>
     </div>
-
-    <div class="stats-container">
+<div class="stats-container">
         <div class="stat-card">
             <div class="stat-label">来場者数</div>
             <div id="visitor-count" class="stat-value">1</div>
@@ -97,10 +132,51 @@
         </div>
     </div>
 
+    <style>
+        .stats-container {
+            max-width: 1400px;
+            margin: 40px auto 10px auto;
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+        }
+        .stat-card {
+            flex: 1;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 10px;
+            border-bottom: 3px solid #3498db;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .stat-label {
+            font-size: 0.8em;
+            color: #bdc3c7;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .stat-value {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #3498db;
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
+    <div class="comment-section">
+        <div style="font-size: 1.1em; color: #3498db; font-weight: bold;">💬 掲示板 / フィードバック</div>
+        <textarea class="comment-textarea" placeholder="メッセージを入力..."></textarea>
+        <div style="text-align: right;">
+            <button class="submit-btn">送信する</button>
+        </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
 
 <script>
+    // =========================================
+    // 1. Firebase 設定と初期化
+    // =========================================
     const firebaseConfig = {
         apiKey: "AIzaSyBxMptE0LD0sBSbJq1D3YHaM0hy36zu05g",
         authDomain: "puyo-logic-stats.firebaseapp.com",
@@ -115,33 +191,57 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const inputLabels = ["盤面行 1:", "盤面行 2:", "盤面行 3:", "盤面行 4:", "盤面行 5:", "盤面行 6:", "+行 1:", "+行 2:", "+行 3:", "+行 4:", "+行 5:", "+行 6:", "BE行 1:", "BE行 2:", "BE行 3:", "BE行 4:", "BE行 5:", "BE行 6:", "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間:", "未設定:"];
+    // =========================================
+    // 2. グローバル変数と初期化処理 (UI生成)
+    // =========================================
+    const inputLabels = [
+        "盤面行 1:", "盤面行 2:", "盤面行 3:", "盤面行 4:", "盤面行 5:", "盤面行 6:", 
+        "+行 1:", "+行 2:", "+行 3:", "+行 4:", "+行 5:", "+行 6:", 
+        "BE行 1:", "BE行 2:", "BE行 3:", "BE行 4:", "BE行 5:", "BE行 6:", 
+        "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間:", "未設定:"
+    ];
 
+    // 💡 【追加】 個別のヒント（24個分）
+const placeholderHints = [
+    "13121232", "25241231", "21545231", "45512452", "44132442", "35545511", // 盤面
+    "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", // プラス
+    "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", // BE
+    "11111111", "11111111", "12", "12", "2", "0"              // 特殊項目
+];
+
+    // ページ読み込み完了時に実行
     window.addEventListener('DOMContentLoaded', () => {
+        // --- A. 来場者数 (自分専用) ---
         let visits = localStorage.getItem('puyo_visits') || 0;
         visits++;
         localStorage.setItem('puyo_visits', visits);
         document.getElementById('visitor-count').textContent = visits.toLocaleString();
 
+        // --- B. 全員の合計統計をリアルタイムに受け取る ---
         db.ref('puyo_stats').on('value', (snapshot) => {
             const data = snapshot.val() || { execs: 0, patterns: 0 };
             document.getElementById('total-execs').textContent = data.execs.toLocaleString();
             document.getElementById('total-patterns').textContent = data.patterns.toLocaleString();
         });
 
+        // --- C. 入力欄 24個を生成 ---
         const inputSection = document.getElementById('input-section');
-        const hints = ["13121232", "25241231", "21545231", "45512452", "44132442", "35545511", "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", "11111111", "11111111", "12", "12", "30", "0"];
-
+        inputSection.innerHTML = ""; 
         for (let i = 0; i < 24; i++) {
             const rowDiv = document.createElement('div');
             rowDiv.className = 'input-row';
-            rowDiv.innerHTML = `<label class="input-label">${inputLabels[i]}</label><input type="text" maxlength="8" class="input-field" placeholder="${hints[i]}">`;
+            rowDiv.innerHTML = `<label class="input-label">${inputLabels[i]}</label><input type="text" maxlength="8" class="input-field" placeholder="${placeholderHints[i]}">`;
             inputSection.appendChild(rowDiv);
         }
 
-        ['original-board', 'output-board', 'repaint-board-1', 'repaint-board-2'].forEach(id => createExcelGrid(id));
+        // --- D. 盤面グリッドを生成 ---
+        createExcelGrid('original-board');
+        createExcelGrid('output-board');
+        createExcelGrid('repaint-board-1');
+        createExcelGrid('repaint-board-2');
     });
 
+    // 盤面をHTMLとして組み立てる関数
     function createExcelGrid(gridId) {
         const grid = document.getElementById(gridId);
         grid.innerHTML = ""; 
@@ -151,61 +251,91 @@
                 if (r === 0 && c === 0) { cell.className = 'cell origin-cell'; cell.textContent = '行\\列'; }
                 else if (r === 0) { cell.className = 'cell header-cell'; cell.textContent = c; }
                 else if (c === 0) { cell.className = 'cell header-cell'; cell.style.width = '45px'; cell.textContent = r; }
-                else { cell.className = 'cell data-cell'; cell.id = `${gridId}-cell-${(r-1)*8 + (c-1)}`; }
+                else { 
+                    cell.className = 'cell data-cell'; 
+                    cell.id = `${gridId}-cell-${(r-1)*8 + (c-1)}`; 
+                }
                 grid.appendChild(cell);
             }
         }
     }
 
-    function startSearch() {
-        db.ref('puyo_stats/execs').transaction(c => (c || 0) + 1);
+    // =========================================
+    // 3. 探索実行と統計の送信
+    // =========================================
+function startSearch() {
+    // 統計の送信
+    db.ref('puyo_stats/execs').transaction(c => (c || 0) + 1);
 
-        const inputs = document.querySelectorAll('.input-field');
-        const inputsArray = Array.from(inputs);
+    const inputs = document.querySelectorAll('.input-field');
+    const inputsArray = Array.from(inputs); // 検索用に配列化
 
-        // 💡 ここがご提案いただいた「iだけ」を使った修正ポイントです
-        const combinedData = inputsArray.map(i => {
-            // mapの内部に手入力で24個の数値を配置
-            const internalHints = [
-                "13121232", "25241231", "21545231", "45512452", "44132442", "35545511", 
-                "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", 
-                "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", 
-                "11111111", "11111111", "12", "12", "30", "0"
-            ];
+    const combinedData = inputsArray.map(i => {
+        // 💡 mapの中に直接、24個の配列を手入力で用意
+        const internalHints = [
+            "13121232", "25241231", "21545231", "45512452", "44132442", "35545511", // 盤面
+            "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", // プラス
+            "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", // BE
+            "11111111", "11111111", "12", "12", "30", "0"                         // 特殊
+        ];
 
-            // 自分が全体の何番目かを探す
-            const idx = inputsArray.indexOf(i);
-            
-            // 入力がなければ、手入力した配列の数字を拾う
-            let val = i.value || internalHints[idx] || "0";
-            return val.padStart(8, '0');
-        }).join(",");
+        // 💡 引数の i が「全体の何番目か」を特定する
+        const idx = inputsArray.indexOf(i);
 
-        if (typeof Module !== 'undefined' && Module.ccall) {
-            Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
-        }
+        // 入力が空なら、内部配列(internalHints)の同じ番号の数値を使う
+        let val = i.value || internalHints[idx] || "0";
+        
+        return val.padStart(8, '0');
+    }).join(",");
+
+    // 🔍 念のため、実際に送るデータをコンソールで確認できるようにします
+    console.log("C言語に送るデータ:", combinedData);
+
+    if (typeof Module !== 'undefined' && Module.ccall) {
+        Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
+    }
+}
+
+    // C言語側から呼ばれるパターン数加算
+    function addPatternCount(count) {
+        // 全員の総パターン数に加算
+        db.ref('puyo_stats/patterns').transaction(c => (c || 0) + count);
     }
 
-    window.addPatternCount = (count) => db.ref('puyo_stats/patterns').transaction(c => (c || 0) + count);
-
-    window.updateUICell = (gridId, index, colorIndex, isPlus = 0, isBonus = 0) => {
+    // =========================================
+    // 4. UI更新 (色・記号)
+    // =========================================
+    function updateUICell(gridId, index, colorIndex, isPlus = 0, isBonus = 0) {
         const cell = document.getElementById(`${gridId}-cell-${index}`);
         if (!cell) return;
+
         const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ff3eff"];
-        cell.style.backgroundColor = (colorIndex === 0 && (gridId === "original-board" || gridId === "output-board")) ? "#ffdae9" : (colors[colorIndex] || "rgba(255,255,255,0.05)");
+        
+        // 🌸 空（0）を白っぽいピンクにする
+        if (colorIndex === 0 && (gridId === "original-board" || gridId === "output-board")) {
+            cell.style.backgroundColor = "#ffdae9"; 
+        } else {
+            cell.style.backgroundColor = colors[colorIndex] || "rgba(255,255,255,0.05)";
+        }
+        
+        // 📝 記号のみ表示
         let text = "";
         if (isPlus) text += "+";
         if (isBonus) text += "B";
         cell.textContent = text;
-    };
+    }
 
-    window.updateUITrace = (row, col, colorIndex) => {
+    function updateUITrace(row, col, colorIndex) {
         const colorCodes = ["#ccc", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ff3eff"];
         const target = document.getElementById('trace-result');
         const colorCode = colorCodes[colorIndex] || "#fff";
-        target.innerHTML = `${row} 行 ${col} 列 <span style="color: ${colorCode}; margin-left: 12px; font-size: 1.2em; text-shadow: 0 0 10px ${colorCode};">●</span>`;
-    };
+
+        target.innerHTML = `
+            ${row} 行 ${col} 列 
+            <span style="color: ${colorCode}; margin-left: 12px; font-size: 1.2em; text-shadow: 0 0 10px ${colorCode};">●</span>
+        `;
+    }
 </script>
-<script src="puyosim.js"></script>
+    <script src="puyosim.js"></script>
 </body>
 </html>
