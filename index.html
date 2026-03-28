@@ -301,7 +301,7 @@ const placeholderHints = [
         const cell = document.getElementById(`${gridId}-cell-${index}`);
         if (!cell) return;
 
-        const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ff3eff"];
+        const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
         
         // 🌸 空（0）を白っぽいピンクにする
         if (colorIndex === 0 && (gridId === "original-board" || gridId === "output-board")) {
@@ -323,7 +323,7 @@ const placeholderHints = [
     }
 
     function updateUITrace(row, col, colorIndex) {
-        const colorCodes = ["#ccc", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ff3eff"];
+        const colorCodes = ["#ccc", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
         const target = document.getElementById('trace-result');
         const colorCode = colorCodes[colorIndex] || "#fff";
 
