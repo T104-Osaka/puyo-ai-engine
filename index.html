@@ -263,29 +263,23 @@ const placeholderHints = [
     // =========================================
     // 3. 探索実行と統計の送信
     // =========================================
-   function startSearch() {
-        console.log("--- 探索ボタンが押されました ---");
+    function startSearch() {
+    // 統計を増やす処理（省略）
+    db.ref('puyo_stats/execs').transaction(c => (c || 0) + 1);
 
-        db.ref('puyo_stats/execs').transaction(c => (c || 0) + 1);
+    const inputs = document.querySelectorAll('.input-field');
+    
+    // 💡 ここがポイント！ .padStart(8, '0') を追加
+    const combinedData = Array.from(inputs).map(i => {
+        let val = i.value || "0"; // 空なら0
+        return val.padStart(8, '0'); // 8桁になるまで左側を"0"で埋める
+    }).join(",");
 
-        const inputs = document.querySelectorAll('.input-field');
-        
-        // 💡 修正ポイント：(i, index) を使い、placeholderHints を参照するように戻します
-        const combinedData = Array.from(inputs).map((i, index) => {
-            // 入力があればそれ、なければ半透明のヒント、それもなければ "0"
-            let val = i.value || placeholderHints[index] || "0";
-            return val.padStart(8, '0');
-        }).join(",");
-
-        // 🔍 ブラウザの「コンソール」に、実際に送るデータを表示します
-        console.log("解析エンジンへ送るデータ:", combinedData);
-
-        if (typeof Module !== 'undefined' && Module.ccall) {
-            Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
-        } else {
-            console.error("解析エンジン(Module)が読み込まれていません！");
-        }
+    if (typeof Module !== 'undefined' && Module.ccall) {
+        Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
     }
+}
+
     // C言語側から呼ばれるパターン数加算
     function addPatternCount(count) {
         // 全員の総パターン数に加算
