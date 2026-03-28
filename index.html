@@ -5,77 +5,131 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ぷよクエ解析シミュレーター</title>
     <style>
-        /* ここで「見た目」を調整します */
-        body { background-color: #2c3e50; color: white; font-family: sans-serif; text-align: center; }
-        h1 { color: #f1c40f; text-shadow: 2px 2px #d35400; margin-top: 30px; }
+        /* 全体の見た目（紺色の背景） */
+        body { background-color: #2c3e50; color: white; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
         
+        h1 { color: #f1c40f; text-shadow: 2px 2px #d35400; }
+        h2 { color: #ecf0f1; border-bottom: 2px solid #3498db; display: inline-block; padding-bottom: 5px; margin-top: 30px; }
+
+        .main-container { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
+
+        /* =========================================
+           1. 入力エリア（20行）のスタイル
+           ========================================= */
+        .input-section {
+            background-color: #34495e; padding: 20px; border-radius: 10px; border: 3px solid #7f8c8d;
+            width: 100%; max-width: 500px;
+        }
+        
+        /* ラベルと入力欄を横並びにする */
+        .input-row { display: flex; align-items: center; margin-bottom: 8px; justify-content: center; }
+        
+        /* ラベル（「行 X:」） */
+        .input-label { width: 80px; text-align: right; margin-right: 15px; font-weight: bold; color: #bdc3c7; }
+        
+        /* 8桁の数字を入れる枠 */
+        .input-field {
+            width: 180px; height: 30px; font-size: 20px; letter-spacing: 5px; /* 文字の間隔を広げる */
+            text-align: center; border-radius: 5px; border: 2px solid #bdc3c7; background-color: #ecf0f1; color: #333;
+        }
+        .input-field:focus { border-color: #3498db; outline: none; background-color: white; }
+
+        /* =========================================
+           2 & 3. 盤面表示エリア（6x8）のスタイル
+           ========================================= */
         .board-container {
-            background-color: #34495e;
-            display: inline-block;
-            padding: 15px;
-            border: 5px solid #7f8c8d;
-            border-radius: 15px;
-            margin-top: 20px;
+            background-color: #34495e; padding: 10px; border-radius: 10px; border: 3px solid #7f8c8d;
+            margin-top: 10px; display: inline-block;
         }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(8, 45px); /* 8列 */
-            gap: 4px;
-        }
-
-        /* 枠の見た目 */
+        
+        .grid { display: grid; grid-template-columns: repeat(8, 35px); gap: 3px; }
+        
+        /* 盤面のセル（画像を表示するための丸い枠） */
         .cell {
-            width: 45px;
-            height: 45px;
-            background-color: #ecf0f1;
-            border-radius: 50%; /* 丸くする */
-            border: none;
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            color: #333;
+            width: 35px; height: 35px; background-color: rgba(236, 240, 241, 0.2);
+            border-radius: 50%; border: 1px solid rgba(127, 140, 141, 0.5);
+            display: flex; align-items: center; justify-content: center; font-size: 10px; color: rgba(255,255,255,0.5);
         }
 
+        /* 実行ボタン */
         .btn {
-            background-color: #e74c3c;
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.2em;
-            cursor: pointer;
-            margin-top: 30px;
-            box-shadow: 0 5px #c0392b;
+            background-color: #e74c3c; color: white; padding: 15px 40px; border: none; border-radius: 50px;
+            font-size: 1.3em; cursor: pointer; margin-top: 20px; box-shadow: 0 5px #c0392b;
         }
+        .btn:hover { background-color: #ff6b6b; }
         .btn:active { transform: translateY(3px); box-shadow: 0 2px #c0392b; }
+
     </style>
 </head>
 <body>
 
-    <h1>🔥 ぷよクエ最強解析ツール 🔥</h1>
-    <p>盤面の数字(0-5)を入力してください</p>
+    <div class="main-container">
+        <h1>🔥 ぷよクエ解析ツール 🔥</h1>
 
-    <div class="board-container">
-        <div id="board" class="grid">
+        <h2>Step 1: 盤面の数値を入力 (20行)</h2>
+        <p style="font-size: 0.9em; color: #bdc3c7;">各行に8桁の数字(0-5)を入れてください</p>
+        
+        <div id="input-section" class="input-section">
             </div>
-    </div>
 
-    <br>
-    <button class="btn">🚀 探索を開始する</button>
+        <button class="btn">🚀 探索を開始する</button>
+
+        <hr style="width: 100%; border: 1px solid #7f8c8d; margin-top: 40px;">
+
+        <h2>Step 2: Cプログラム出力盤面</h2>
+        <br>
+        <div class="board-container">
+            <div id="output-board" class="grid">
+                </div>
+        </div>
+
+        <h2>Step 3: 塗り替え盤面</h2>
+        <br>
+        <div class="board-container">
+            <div id="repaint-board" class="grid">
+                </div>
+        </div>
+        
+        <div style="height: 50px;"></div> </div>
 
     <script>
-        // 48個の入力枠を作る
-        const board = document.getElementById('board');
-        for (let i = 0; i < 48; i++) {
+        // --- 1. 入力エリア(20行)を生成 ---
+        const inputSection = document.getElementById('input-section');
+        for (let i = 1; i <= 20; i++) {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'input-row';
+            
+            // ラベル（「行 X:」）
+            const label = document.createElement('label');
+            label.className = 'input-label';
+            label.textContent = `行 ${i}:`;
+            
+            // 8桁入力フィールド
             const input = document.createElement('input');
             input.type = 'text';
-            input.maxLength = 1;
-            input.className = 'cell';
-            // 初期値として数字を入れておく
-            input.value = "0";
-            board.appendChild(input);
+            input.maxLength = 8; // 8桁まで
+            input.placeholder = "12345678";
+            input.className = 'input-field';
+            
+            rowDiv.appendChild(label);
+            rowDiv.appendChild(input);
+            inputSection.appendChild(rowDiv);
         }
+
+        // --- 2 & 3. 盤面表示エリア(6x8)を生成 ---
+        function createGrid(gridId) {
+            const grid = document.getElementById(gridId);
+            for (let i = 0; i < 48; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                // あとで画像を入れる目印として番号を振っておく
+                cell.textContent = i;
+                grid.appendChild(cell);
+            }
+        }
+        
+        createGrid('output-board');
+        createGrid('repaint-board');
     </script>
 </body>
 </html>
