@@ -196,17 +196,22 @@
             const cell = document.getElementById(`${gridId}-cell-${index}`);
             if (!cell) return;
 
+            // ぷよの色定義
             const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ff3eff"];
-            cell.style.backgroundColor = colors[colorIndex] || "rgba(255,255,255,0.05)";
             
-            // テキスト表示ロジック（＋とBを優先、なければ色番号）
+            // 🍑 「ももいろ」と背景色の設定
+            if (colorIndex === 0 && (gridId === "original-board" || gridId === "output-board")) {
+                cell.style.backgroundColor = "#ffdab9"; // ももいろ
+            } else {
+                cell.style.backgroundColor = colors[colorIndex] || "rgba(255,255,255,0.05)";
+            }
+            
+            // 📝 テキスト表示ロジック（記号のみを表示）
             let text = "";
             if (isPlus) text += "+";
             if (isBonus) text += "B";
             
-            if (text === "" && colorIndex > 0) {
-                text = colorIndex;
-            }
+            // ★以前あった「text = colorIndex;」の部分を削除しました
             
             cell.textContent = text;
         }
