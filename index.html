@@ -117,7 +117,51 @@
             </div>
         </div>
     </div>
+<div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-label">👥 来場者数</div>
+            <div id="visitor-count" class="stat-value">1</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">⚔️ 総探索回数</div>
+            <div id="total-execs" class="stat-value">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">🔮 総探索パターン数</div>
+            <div id="total-patterns" class="stat-value">0</div>
+        </div>
+    </div>
 
+    <style>
+        .stats-container {
+            max-width: 1400px;
+            margin: 40px auto 10px auto;
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+        }
+        .stat-card {
+            flex: 1;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 10px;
+            border-bottom: 3px solid #3498db;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .stat-label {
+            font-size: 0.8em;
+            color: #bdc3c7;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .stat-value {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #3498db;
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
     <div class="comment-section">
         <div style="font-size: 1.1em; color: #3498db; font-weight: bold;">💬 掲示板 / フィードバック</div>
         <textarea class="comment-textarea" placeholder="メッセージを入力..."></textarea>
@@ -137,6 +181,36 @@
             "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間:", "未設定:"
         ];
 
+// --- 統計用グローバル変数 ---
+        let totalExecutions = 0;
+        let totalPatterns = 0;
+
+        // 来場者数のカウント（ローカルストレージ使用）
+        window.addEventListener('DOMContentLoaded', () => {
+            let visits = localStorage.getItem('puyo_visits') || 0;
+            visits++;
+            localStorage.setItem('puyo_visits', visits);
+            document.getElementById('visitor-count').textContent = visits.toLocaleString();
+        });
+
+        // 探索開始時に回数を増やす
+        function startSearch() {
+            totalExecutions++; // 回数をカウント
+            document.getElementById('total-execs').textContent = totalExecutions.toLocaleString();
+
+            const inputs = document.querySelectorAll('.input-field');
+            const combinedData = Array.from(inputs).map(i => i.value || "00000000").join(",");
+            
+            if (typeof Module !== 'undefined' && Module.ccall) {
+                Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
+            }
+        }
+
+        // C言語から呼ばれる「探索パターン数」の加算関数
+        function addPatternCount(count) {
+            totalPatterns += count;
+            document.getElementById('total-patterns').textContent = totalPatterns.toLocaleString();
+        }
         const inputSection = document.getElementById('input-section');
         for (let i = 0; i < 24; i++) {
             const rowDiv = document.createElement('div');
