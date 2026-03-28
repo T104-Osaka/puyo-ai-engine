@@ -234,7 +234,7 @@
 
         // 💡 ネクスト表示の更新（色とプラス）
         const nextColorsStr = (inputs[18].value || "11111111").padStart(8, '1');
-        const nextPlusStr = (inputs[19].value || "00000000").padStart(8, '0');
+        const nextPlusStr = (inputs[19].value || "11111111").padStart(8, '0');
         for (let i = 0; i < 8; i++) {
             const cell = document.getElementById(`next-cell-${i}`);
             const colorIdx = parseInt(nextColorsStr[i]) || 0;
