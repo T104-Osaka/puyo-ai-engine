@@ -41,20 +41,35 @@
         .input-field { width: 85px; height: 22px; font-size: 13px; text-align: center; border-radius: 4px; border: 1px solid #bdc3c7; background: #ecf0f1; }
 
         /* =========================================
-           右側：2x2 盤面レイアウト
+           右側：解析表示
            ========================================= */
         .main-display { display: flex; flex-direction: column; gap: 25px; }
         .display-row { display: flex; gap: 25px; align-items: flex-end; }
 
         .board-wrapper { text-align: center; display: flex; flex-direction: column; align-items: flex-start; }
-        .board-title { font-size: 0.85em; color: #ecf0f1; margin-bottom: 6px; border-left: 4px solid #3498db; padding-left: 8px; font-weight: bold; }
         
-        /* 解析結果（右上盤面のすぐ上に配置） */
-        .trace-container {
-            width: 100%; min-height: 40px; margin-bottom: 10px; background: rgba(26, 188, 156, 0.2);
-            border: 1px solid #1abc9c; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+        /* タイトルを上にずらすための調整 */
+        .board-title { 
+            font-size: 0.85em; color: #ecf0f1; 
+            margin-bottom: 4px; /* ネクストとの隙間 */
+            border-left: 4px solid #3498db; padding-left: 8px; font-weight: bold; 
         }
-        #trace-result { font-size: 1.3em; font-weight: bold; color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+
+        /* 💡 ネクストぷよ専用のコンテナ */
+        .next-puyo-row {
+            display: flex;
+            margin-left: 48px; /* 行見出し(45px)+隙間(3px)分ずらして列を合わせる */
+            gap: 3px;
+            margin-bottom: 8px; /* 盤面との隙間 */
+        }
+        .next-puyo-cell {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: bold;
+            border: 1px solid rgba(255,255,255,0.2);
+            background-color: rgba(255,255,255,0.05);
+        }
 
         .board-container { 
             background-color: #2c3e50; padding: 8px; border-radius: 8px; border: 2px solid #7f8c8d; 
@@ -69,9 +84,10 @@
         .btn { background: linear-gradient(to bottom, #e74c3c, #c0392b); color: white; padding: 12px; border: none; border-radius: 30px; cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px #952d23; }
         .btn:active { transform: translateY(2px); box-shadow: 0 2px #952d23; }
 
-        .comment-section { max-width: 1400px; margin: 40px auto; background-color: #34495e; padding: 25px; border-radius: 12px; text-align: left; }
-        .comment-textarea { width: 100%; height: 60px; border-radius: 6px; border: 1px solid #7f8c8d; padding: 10px; box-sizing: border-box; margin: 15px 0; }
-        .submit-btn { background-color: #3498db; color: white; border: none; padding: 10px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .stats-container { max-width: 1400px; margin: 40px auto 10px auto; display: flex; gap: 20px; justify-content: space-between; }
+        .stat-card { flex: 1; background-color: #34495e; padding: 15px; border-radius: 10px; border-bottom: 3px solid #3498db; text-align: center; }
+        .stat-label { font-size: 0.8em; color: #bdc3c7; margin-bottom: 5px; font-weight: bold; }
+        .stat-value { font-size: 1.6em; font-weight: bold; color: #3498db; font-family: 'Courier New', Courier, monospace; }
     </style>
 </head>
 <body>
@@ -80,7 +96,7 @@
 
     <div class="usage-section">
         <strong>💡 使い方ガイド</strong><br>
-        現在製作中<br>動きません
+        「N盤面」に8桁入力で各列のネクスト色、「N+」でプラスの有無を指定できます。
     </div>
 
     <div class="wrapper">
@@ -93,7 +109,12 @@
             <div class="display-row">
                 <div class="board-wrapper">
                     <div class="board-title">塗り替え前 (入力盤面)</div>
-                    <div class="board-container"><div id="original-board" class="grid"></div></div>
+                    
+                    <div id="next-puyo-row" class="next-puyo-row"></div>
+
+                    <div class="board-container">
+                        <div id="original-board" class="grid"></div>
+                    </div>
                 </div>
                 
                 <div class="board-wrapper">
@@ -117,7 +138,8 @@
             </div>
         </div>
     </div>
-<div class="stats-container">
+
+    <div class="stats-container">
         <div class="stat-card">
             <div class="stat-label">来場者数</div>
             <div id="visitor-count" class="stat-value">1</div>
@@ -132,50 +154,12 @@
         </div>
     </div>
 
-    <style>
-        .stats-container {
-            max-width: 1400px;
-            margin: 40px auto 10px auto;
-            display: flex;
-            gap: 20px;
-            justify-content: space-between;
-        }
-        .stat-card {
-            flex: 1;
-            background-color: #34495e;
-            padding: 15px;
-            border-radius: 10px;
-            border-bottom: 3px solid #3498db;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        .stat-label {
-            font-size: 0.8em;
-            color: #bdc3c7;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .stat-value {
-            font-size: 1.6em;
-            font-weight: bold;
-            color: #3498db;
-            font-family: 'Courier New', Courier, monospace;
-        }
-    </style>
-    <div class="comment-section">
-        <div style="font-size: 1.1em; color: #3498db; font-weight: bold;">💬 掲示板 / フィードバック</div>
-        <textarea class="comment-textarea" placeholder="メッセージを入力..."></textarea>
-        <div style="text-align: right;">
-            <button class="submit-btn">送信する</button>
-        </div>
-    </div>
-
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js" crossorigin="anonymous"></script>
-<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js" crossorigin="anonymous"></script>
 
 <script>
     // =========================================
-    // 1. Firebase 設定と初期化
+    // 1. Firebase 初期化
     // =========================================
     const firebaseConfig = {
         apiKey: "AIzaSyBxMptE0LD0sBSbJq1D3YHaM0hy36zu05g",
@@ -190,9 +174,10 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    db.getDatabase().setForceWebSockets(true); 
 
     // =========================================
-    // 2. グローバル変数と初期化処理 (UI生成)
+    // 2. UI初期化
     // =========================================
     const inputLabels = [
         "盤面行 1:", "盤面行 2:", "盤面行 3:", "盤面行 4:", "盤面行 5:", "盤面行 6:", 
@@ -201,30 +186,28 @@
         "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間:", "未設定:"
     ];
 
-    // 💡 【追加】 個別のヒント（24個分）
-const placeholderHints = [
-    "13121232", "25241231", "21545231", "45512452", "44132442", "35545511", // 盤面
-    "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", // プラス
-    "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", // BE
-    "11111111", "11111111", "12", "12", "2", "0"              // 特殊項目
-];
+    const placeholderHints = [
+        "13121232", "25241231", "21545231", "45512452", "44132442", "35545511", 
+        "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", 
+        "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", 
+        "11111111", "11111111", "12", "12", "2", "0"
+    ];
 
-    // ページ読み込み完了時に実行
     window.addEventListener('DOMContentLoaded', () => {
-        // --- A. 来場者数 (自分専用) ---
+        // 来場者数
         let visits = localStorage.getItem('puyo_visits') || 0;
         visits++;
         localStorage.setItem('puyo_visits', visits);
         document.getElementById('visitor-count').textContent = visits.toLocaleString();
 
-        // --- B. 全員の合計統計をリアルタイムに受け取る ---
+        // 統計
         db.ref('puyo_stats').on('value', (snapshot) => {
             const data = snapshot.val() || { execs: 0, patterns: 0 };
-            document.getElementById('total-execs').textContent = data.execs.toLocaleString();
-            document.getElementById('total-patterns').textContent = data.patterns.toLocaleString();
+            document.getElementById('total-execs').textContent = (data.execs || 0).toLocaleString();
+            document.getElementById('total-patterns').textContent = (data.patterns || 0).toLocaleString();
         });
 
-        // --- C. 入力欄 24個を生成 ---
+        // 入力欄
         const inputSection = document.getElementById('input-section');
         inputSection.innerHTML = ""; 
         for (let i = 0; i < 24; i++) {
@@ -234,14 +217,21 @@ const placeholderHints = [
             inputSection.appendChild(rowDiv);
         }
 
-        // --- D. 盤面グリッドを生成 ---
+        // 💡 ネクスト行のセルを8つ作成
+        const nextRow = document.getElementById('next-puyo-row');
+        for (let i = 0; i < 8; i++) {
+            const cell = document.createElement('div');
+            cell.id = `next-puyo-cell-${i}`;
+            cell.className = 'next-puyo-cell';
+            nextRow.appendChild(cell);
+        }
+
         createExcelGrid('original-board');
         createExcelGrid('output-board');
         createExcelGrid('repaint-board-1');
         createExcelGrid('repaint-board-2');
     });
 
-    // 盤面をHTMLとして組み立てる関数
     function createExcelGrid(gridId) {
         const grid = document.getElementById(gridId);
         grid.innerHTML = ""; 
@@ -261,78 +251,75 @@ const placeholderHints = [
     }
 
     // =========================================
-    // 3. 探索実行と統計の送信
+    // 3. 探索開始
     // =========================================
     function startSearch() {
-    // 統計を増やす処理（省略）
-    db.ref('puyo_stats/execs').transaction(c => (c || 0) + 1);
+        db.ref('puyo_stats/execs').transaction(c => (c || 0) + 1);
 
-    const inputs = document.querySelectorAll('.input-field');
+        const inputs = document.querySelectorAll('.input-field');
+        const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ff3eff"];
 
-    let n = 0;
-    // 💡 ここがポイント！ .padStart(8, '0') を追加
-    const combinedData = Array.from(inputs).map(i => {
-        const Hints = [
-    "13121232", "25241231", "21545231", "45512452", "44132442", "35545511", // 盤面
-    "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", // プラス
-    "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", // BE
-    "11111111", "11111111", "12", "12", "2", "0"              // 特殊項目
-];
-        let val = i.value || Hints[n++];
-        return val.padStart(8, '0'); // 8桁になるまで左側を"0"で埋める
-    }).join(",");
+        // 💡 ネクストぷよ（色とプラス）を表示に反映
+        const nextData = (inputs[18].value || "11111111").padStart(8, '1');
+        const nextPlus = (inputs[19].value || "00000000").padStart(8, '0');
+        for (let i = 0; i < 8; i++) {
+            const cell = document.getElementById(`next-puyo-cell-${i}`);
+            const cIdx = parseInt(nextData[i]) || 0;
+            cell.style.backgroundColor = colors[cIdx];
+            cell.textContent = nextPlus[i] === "1" ? "+" : "";
+        }
 
-    if (typeof Module !== 'undefined' && Module.ccall) {
-        Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
+        let n = 0;
+        const combinedData = Array.from(inputs).map(i => {
+            const Hints = [
+                "13121232", "25241231", "21545231", "45512452", "44132442", "35545511",
+                "10001001", "01100111", "01011101", "11011011", "11110011", "01111011",
+                "00000000", "10001100", "11001010", "01000111", "01101011", "00110110",
+                "11111111", "11111111", "12", "12", "2", "0"
+            ];
+            let val = i.value || Hints[n++];
+            return val.padStart(8, '0');
+        }).join(",");
+
+        if (typeof Module !== 'undefined' && Module.ccall) {
+            Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
+        }
     }
-}
 
-    // C言語側から呼ばれるパターン数加算
+    // =========================================
+    // 4. WASMからのコールバック
+    // =========================================
     window.addPatternCount = function(count) {
         if (!count) return;
-        console.log("C言語から届いたパターン数:", count); // デバッグ用
         db.ref('puyo_stats/patterns').transaction(c => (c || 0) + Number(count));
     };
 
-    // =========================================
-    // 4. UI更新 (色・記号)
-    // =========================================
-    function updateUICell(gridId, index, colorIndex, isPlus = 0, isBonus = 0) {
+    window.updateUICell = function(gridId, index, colorIndex, isPlus = 0, isBonus = 0) {
         const cell = document.getElementById(`${gridId}-cell-${index}`);
         if (!cell) return;
-
         const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ff3eff"];
         
-        // 🌸 空（0）を白っぽいピンクにする
         if (colorIndex === 0 && (gridId === "original-board" || gridId === "output-board")) {
             cell.style.backgroundColor = "#ffdae9"; 
         } else {
             cell.style.backgroundColor = colors[colorIndex] || "rgba(255,255,255,0.05)";
         }
         
-// 📝 記号の表示制御
-        let text = "";
-
-        // 💡 ここを追加！ 塗り替え後の盤面（output-board）以外の場合のみ、記号を設定する
+        let text = "";
         if (gridId !== "output-board") {
-            if (isPlus) text += "+";
-            if (isBonus) text += "B";
+            if (isPlus) text += "+";
+            if (isBonus) text += "B";
         }
+        cell.textContent = text;
+    };
 
-        cell.textContent = text;
-    }
-
-    function updateUITrace(row, col, colorIndex) {
+    window.updateUITrace = function(row, col, colorIndex) {
         const colorCodes = ["#ccc", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ff3eff"];
         const target = document.getElementById('trace-result');
         const colorCode = colorCodes[colorIndex] || "#fff";
-
-        target.innerHTML = `
-            ${row} 行 ${col} 列 
-            <span style="color: ${colorCode}; margin-left: 12px; font-size: 1.2em; text-shadow: 0 0 10px ${colorCode};">●</span>
-        `;
-    }
+        target.innerHTML = `${row} 行 ${col} 列 <span style="color: ${colorCode}; margin-left: 12px; font-size: 1.2em; text-shadow: 0 0 10px ${colorCode};">●</span>`;
+    };
 </script>
-    <script src="puyosim.js"></script>
+<script src="puyosim.js"></script>
 </body>
 </html>
