@@ -206,7 +206,7 @@ const placeholderHints = [
     "13121232", "25241231", "21545231", "45512452", "44132442", "35545511", // 盤面
     "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", // プラス
     "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", // BE
-    "11111111", "11111111", "12", "12", "2", "0"              // 特殊項目
+    "11111111", "11111111", "12", "12", "30", "0"              // 特殊項目
 ];
 
     // ページ読み込み完了時に実行
@@ -263,33 +263,17 @@ const placeholderHints = [
     // =========================================
     // 3. 探索実行と統計の送信
     // =========================================
-function startSearch() {
-    // 統計の送信
+    function startSearch() {
+    // 統計を増やす処理（省略）
     db.ref('puyo_stats/execs').transaction(c => (c || 0) + 1);
 
     const inputs = document.querySelectorAll('.input-field');
-    const inputsArray = Array.from(inputs); // 検索用に配列化
-
-    const combinedData = inputsArray.map(i => {
-        // 💡 mapの中に直接、24個の配列を手入力で用意
-        const internalHints = [
-            "13121232", "25241231", "21545231", "45512452", "44132442", "35545511", // 盤面
-            "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", // プラス
-            "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", // BE
-            "11111111", "11111111", "12", "12", "2", "0"                         // 特殊
-        ];
-
-        // 💡 引数の i が「全体の何番目か」を特定する
-        const idx = inputsArray.indexOf(i);
-
-        // 入力が空なら、内部配列(internalHints)の同じ番号の数値を使う
-        let val = i.value || internalHints[idx] || "0";
-        
-        return val.padStart(8, '0');
+    
+    // 💡 ここがポイント！ .padStart(8, '0') を追加
+    const combinedData = Array.from(inputs).map(i => {
+        let val = i.value || "0"; // 空なら0
+        return val.padStart(8, '0'); // 8桁になるまで左側を"0"で埋める
     }).join(",");
-
-    // 🔍 念のため、実際に送るデータをコンソールで確認できるようにします
-    console.log("C言語に送るデータ:", combinedData);
 
     if (typeof Module !== 'undefined' && Module.ccall) {
         Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
