@@ -6,7 +6,7 @@
     <title>ぷよクエ解析シミュレーター</title>
     <style>
         /* =========================================
-            基本デザイン
+            基本デザイン & レイアウト
            ========================================= */
         body { 
             background: linear-gradient(135deg, #2c3e50 0%, #000000 100%); 
@@ -43,17 +43,17 @@
         .display-row { display: flex; gap: 25px; align-items: flex-end; }
         .board-wrapper { text-align: center; display: flex; flex-direction: column; align-items: flex-start; }
 
-        /* 💡 タイトルを上に配置 */
+        /* タイトルを上に配置 */
         .board-title { 
             font-size: 0.85em; color: #ecf0f1; 
             margin-bottom: 4px; 
             border-left: 4px solid #3498db; padding-left: 8px; font-weight: bold; 
         }
 
-        /* 💡 ネクスト行（盤面の8列にピッタリ合わせる） */
+        /* ネクストぷよ行（盤面の8列に位置合わせ） */
         .next-puyo-row {
             display: flex;
-            margin-left: 48px; /* 行番号(45px) + 隙間(3px) 分ずらす */
+            margin-left: 48px; 
             gap: 3px;
             margin-bottom: 8px;
         }
@@ -69,12 +69,6 @@
             text-shadow: 1px 1px 2px #000;
         }
 
-        .trace-container {
-            width: 100%; min-height: 40px; margin-bottom: 10px; background: rgba(26, 188, 156, 0.2);
-            border: 1px solid #1abc9c; border-radius: 6px; display: flex; align-items: center; justify-content: center;
-        }
-        #trace-result { font-size: 1.3em; font-weight: bold; color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
-
         .board-container { 
             background-color: #2c3e50; padding: 8px; border-radius: 8px; border: 2px solid #7f8c8d; 
             display: inline-block; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
@@ -85,9 +79,16 @@
         .header-cell { color: #f1c40f; font-size: 11px; font-weight: bold; background-color: rgba(0,0,0,0.4); border-radius: 4px; }
         .origin-cell { width: 45px; font-size: 10px; color: #bdc3c7; background-color: rgba(0,0,0,0.5); }
 
+        .trace-container {
+            width: 100%; min-height: 40px; margin-bottom: 10px; background: rgba(26, 188, 156, 0.2);
+            border: 1px solid #1abc9c; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+        }
+        #trace-result { font-size: 1.3em; font-weight: bold; color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+
         .btn { background: linear-gradient(to bottom, #e74c3c, #c0392b); color: white; padding: 12px; border: none; border-radius: 30px; cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px #952d23; }
         .btn:active { transform: translateY(2px); box-shadow: 0 2px #952d23; }
 
+        /* 統計エリア */
         .stats-container { max-width: 1400px; margin: 40px auto 10px auto; display: flex; gap: 20px; justify-content: space-between; }
         .stat-card { flex: 1; background-color: #34495e; padding: 15px; border-radius: 10px; border-bottom: 3px solid #3498db; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .stat-label { font-size: 0.8em; color: #bdc3c7; margin-bottom: 5px; font-weight: bold; }
@@ -104,7 +105,8 @@
 
     <div class="usage-section">
         <strong>💡 使い方ガイド</strong><br>
-        解析エンジン製作中<br>まだ動きません
+        「探索開始」を押すと解析が始まり、探索データがリアルタイムで更新されます。<br>
+        N盤面：ネクストの色 / N+：プラスぷよの有無（1でプラス）
     </div>
 
     <div class="wrapper">
@@ -142,7 +144,7 @@
     </div>
 
     <div class="stats-container">
-        <div class="stat-card"><div class="stat-label">来場者数</div><div id="visitor-count" class="stat-value">1</div></div>
+        <div class="stat-card"><div class="stat-label">来場者数</div><div id="visitor-count" class="stat-value">0</div></div>
         <div class="stat-card"><div class="stat-label">総探索回数</div><div id="total-execs" class="stat-value">0</div></div>
         <div class="stat-card"><div class="stat-label">総探索パターン数</div><div id="total-patterns" class="stat-value">0</div></div>
     </div>
@@ -175,18 +177,20 @@
     const placeholderHints = ["13121232", "25241231", "21545231", "45512452", "44132442", "35545511", "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", "11111111", "11111111", "12", "12", "2", "0"];
 
     window.addEventListener('DOMContentLoaded', () => {
-        // 統計処理
-        let visits = localStorage.getItem('puyo_visits') || 0;
-        visits++;
-        localStorage.setItem('puyo_visits', visits);
-        document.getElementById('visitor-count').textContent = visits.toLocaleString();
+        // --- 📊 全統計のリアルタイム表示 ---
         db.ref('puyo_stats').on('value', (snapshot) => {
-            const data = snapshot.val() || { execs: 0, patterns: 0 };
-            document.getElementById('total-execs').textContent = data.execs.toLocaleString();
-            document.getElementById('total-patterns').textContent = data.patterns.toLocaleString();
+            const data = snapshot.val() || { execs: 0, patterns: 0, visitors: 0 };
+            document.getElementById('visitor-count').textContent = (data.visitors || 0).toLocaleString();
+            document.getElementById('total-execs').textContent = (data.execs || 0).toLocaleString();
+            document.getElementById('total-patterns').textContent = (data.patterns || 0).toLocaleString();
         });
 
-        // 入力欄生成
+        // --- 🚀 【修正】 来場者数はページ読み込み時（セッション中1回）のみ加算 ---
+        if (!sessionStorage.getItem('puyo_visited')) {
+            db.ref('puyo_stats/visitors').set(firebase.database.ServerValue.increment(1));
+            sessionStorage.setItem('puyo_visited', 'true');
+        }
+
         const inputSection = document.getElementById('input-section');
         for (let i = 0; i < 24; i++) {
             const rowDiv = document.createElement('div');
@@ -195,7 +199,6 @@
             inputSection.appendChild(rowDiv);
         }
 
-        // 💡 ネクストぷよセルの生成
         const nextRow = document.getElementById('next-puyo-row');
         for (let i = 0; i < 8; i++) {
             const cell = document.createElement('div');
@@ -227,26 +230,27 @@
         }
     }
 
+    // --- 🚀 探索開始（探索回数のみを加算） ---
     function startSearch() {
-        db.ref('puyo_stats/execs').transaction(c => (c || 0) + 1);
+        // 探索回数をインクリメント（来場者数はここでは増やさない）
+        db.ref('puyo_stats/execs').set(firebase.database.ServerValue.increment(1));
+        
         const inputs = document.querySelectorAll('.input-field');
         const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
 
-        // 💡 ネクスト表示の更新（色とプラス）
-        const nextColorsStr = (inputs[18].value || "11111111").padStart(8, '1');
-        const nextPlusStr = (inputs[19].value || "11111111").padStart(8, '0');
+        // ネクスト表示の更新
+        const nextColorsStr = (inputs[18].value || placeholderHints[18]).padStart(8, '1');
+        const nextPlusStr = (inputs[19].value || placeholderHints[19]).padStart(8, '0');
         for (let i = 0; i < 8; i++) {
             const cell = document.getElementById(`next-cell-${i}`);
             const colorIdx = parseInt(nextColorsStr[i]) || 0;
             cell.style.backgroundColor = colors[colorIdx];
-            // 💡 プラス記号を表示
             cell.textContent = nextPlusStr[i] === "1" ? "+" : "";
         }
 
         let n = 0;
         const combinedData = Array.from(inputs).map(i => {
-            const Hints = ["13121232", "25241231", "21545231", "45512452", "44132442", "35545511", "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", "11111111", "11111111", "12", "12", "2", "0"];
-            let val = i.value || Hints[n++];
+            let val = i.value || placeholderHints[n++];
             return val.padStart(8, '0');
         }).join(",");
 
@@ -255,10 +259,11 @@
         }
     }
 
+    // --- 📊 パターン数の加算 ---
     window.addPatternCount = function(count) {
-    if (!count || isNaN(count)) return;
-    db.ref('puyo_stats/patterns').set(firebase.database.ServerValue.increment(Number(count)));
-};
+        if (!count || isNaN(count)) return;
+        db.ref('puyo_stats/patterns').set(firebase.database.ServerValue.increment(Number(count)));
+    };
 
     window.updateUICell = function(gridId, index, colorIndex, isPlus = 0, isBonus = 0) {
         const cell = document.getElementById(`${gridId}-cell-${index}`);
