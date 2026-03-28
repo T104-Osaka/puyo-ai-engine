@@ -268,7 +268,8 @@ const placeholderHints = [
     db.ref('puyo_stats/execs').transaction(c => (c || 0) + 1);
 
     const inputs = document.querySelectorAll('.input-field');
-    
+
+    let n = 0;
     // 💡 ここがポイント！ .padStart(8, '0') を追加
     const combinedData = Array.from(inputs).map(i => {
         const Hints = [
@@ -277,7 +278,7 @@ const placeholderHints = [
     "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", // BE
     "11111111", "11111111", "12", "12", "2", "0"              // 特殊項目
 ];
-        let val = i.value || Hints[12];
+        let val = i.value || Hints[n++];
         return val.padStart(8, '0'); // 8桁になるまで左側を"0"で埋める
     }).join(",");
 
