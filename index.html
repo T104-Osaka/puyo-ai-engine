@@ -112,6 +112,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    db.setForceWebSockets(true);
     // 💡 接続を強制的に確立させる（アジアサーバーで有効な設定）
     db.goOnline();
 
