@@ -295,7 +295,52 @@
                 </span>
             `;
         }
-    </script>
-    <script src="puyosim.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
+
+<script>
+    // 2. あなた専用の設定（さっき取得したやつ！）
+    const firebaseConfig = {
+        apiKey: "AIzaSyBxMptE0LD0sBSbJq1D3YHaM0hy36zu05g",
+        authDomain: "puyo-logic-stats.firebaseapp.com",
+        databaseURL: "https://puyo-logic-stats-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "puyo-logic-stats",
+        storageBucket: "puyo-logic-stats.firebasestorage.app",
+        messagingSenderId: "369432653847",
+        appId: "1:369432653847:web:d09f669ac2a8ef4e61ac52",
+        measurementId: "G-1GYB847L0E"
+    };
+
+    // Firebase 初期化
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 3. 全員の合計をリアルタイムに受け取って表示
+    // (Firebaseの中身が変わると、自動的にここの数字が書き換わります)
+    db.ref('puyo_stats').on('value', (snapshot) => {
+        const data = snapshot.val() || { execs: 0, patterns: 0 };
+        document.getElementById('total-execs').textContent = data.execs.toLocaleString();
+        document.getElementById('total-patterns').textContent = data.patterns.toLocaleString();
+    });
+
+    // 4. 探索開始ボタン（全員の探索回数を +1 する）
+    function startSearch() {
+        // Firebaseの数字を増やす
+        db.ref('puyo_stats/execs').transaction(c => (c || 0) + 1);
+
+        const inputs = document.querySelectorAll('.input-field');
+        const combinedData = Array.from(inputs).map(i => i.value || "00000000").join(",");
+        
+        if (typeof Module !== 'undefined' && Module.ccall) {
+            Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
+        }
+    }
+
+    // 5. パターン数加算（C言語から呼ばれる）
+    function addPatternCount(count) {
+        // Firebaseの総パターン数にプラスする
+        db.ref('puyo_stats/patterns').transaction(c => (c || 0) + count);
+    }
+</script>
 </body>
 </html>
