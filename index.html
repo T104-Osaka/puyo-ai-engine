@@ -92,21 +92,15 @@
         <div class="main-display">
             <div class="display-row">
                 <div class="board-wrapper">
-    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px; width: 100%;">
-        <div class="board-title" style="margin-bottom: 0;">塗り替え前 (入力盤面)</div>
-        
-        <div style="display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.4); padding: 3px 10px; border-radius: 15px; border: 1px solid #3498db;">
-            <span style="font-size: 10px; color: #3498db; font-weight: bold;">NEXT</span>
-            <div id="next-puyo-1" style="width: 16px; height: 16px; border-radius: 50%; background: #ff3e3e; box-shadow: 0 0 5px #ff3e3e;"></div>
-            <div id="next-puyo-2" style="width: 16px; height: 16px; border-radius: 50%; background: #4da3ff; box-shadow: 0 0 5px #4da3ff;"></div>
+    <div class="board-title" style="margin-bottom: 5px;">塗り替え前 (入力盤面)</div>
+
+    <div id="next-row-container" style="display: flex; margin-left: 48px; gap: 3px; margin-bottom: 8px;">
         </div>
-    </div>
     
     <div class="board-container">
         <div id="original-board" class="grid"></div>
     </div>
-</div>
-                
+</div>          
                 <div class="board-wrapper">
                     <div class="trace-container">
                         <div id="trace-result">-- 行 -- 列</div>
