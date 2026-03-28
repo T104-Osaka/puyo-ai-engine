@@ -230,7 +230,7 @@ const placeholderHints = [
         for (let i = 0; i < 24; i++) {
             const rowDiv = document.createElement('div');
             rowDiv.className = 'input-row';
-            rowDiv.innerHTML = `<label class="input-label">${inputLabels[i]}</label><input type="text" maxlength="8" class="input-field" placeholder="00000000">`;
+            rowDiv.innerHTML = `<label class="input-label">${inputLabels[i]}</label><input type="text" maxlength="8" class="input-field" placeholder="${placeholderHints[i]}">`;
             inputSection.appendChild(rowDiv);
         }
 
