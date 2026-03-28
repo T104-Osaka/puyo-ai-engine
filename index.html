@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ぷよクエ解析シミュレーター</title>
     <style>
-        /* デザイン部分は変更なし */
+        /* デザイン設定 */
         body { background: linear-gradient(135deg, #2c3e50 0%, #000000 100%); color: white; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 20px; line-height: 1.3; min-height: 100vh; }
         h1 { color: #f1c40f; text-shadow: 2px 2px #d35400; font-size: 1.8em; text-align: center; margin-bottom: 20px; }
         .usage-section { background-color: rgba(52, 73, 94, 0.8); padding: 15px; border-radius: 10px; border-left: 6px solid #f1c40f; max-width: 1400px; margin: 0 auto 20px auto; font-size: 0.85em; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
@@ -32,7 +32,7 @@
         .btn { background: linear-gradient(to bottom, #e74c3c, #c0392b); color: white; padding: 12px; border: none; border-radius: 30px; cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px #952d23; }
         .btn:active { transform: translateY(2px); box-shadow: 0 2px #952d23; }
 
-        /* 統計エリア：来場者を消して2列に調整 */
+        /* 統計エリア：中央寄せの2列設定 */
         .stats-container { max-width: 1000px; margin: 40px auto 10px auto; display: flex; gap: 20px; justify-content: center; }
         .stat-card { flex: 1; max-width: 400px; background-color: #34495e; padding: 15px; border-radius: 10px; border-bottom: 3px solid #3498db; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .stat-label { font-size: 0.8em; color: #bdc3c7; margin-bottom: 5px; font-weight: bold; }
@@ -99,7 +99,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
 
 <script>
-    // 1. Firebase 初期設定
+    // 1. Firebase 初期化
     const firebaseConfig = {
         apiKey: "AIzaSyBxMptE0LD0sBSbJq1D3YHaM0hy36zu05g",
         authDomain: "puyo-logic-stats.firebaseapp.com",
@@ -119,7 +119,7 @@
     const inputLabels = ["盤面行 1:", "盤面行 2:", "盤面行 3:", "盤面行 4:", "盤面行 5:", "盤面行 6:", "+行 1:", "+行 2:", "+行 3:", "+行 4:", "+行 5:", "+行 6:", "BE行 1:", "BE行 2:", "BE行 3:", "BE行 4:", "BE行 5:", "BE行 6:", "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間:", "未設定:"];
     const placeholderHints = ["13121232", "25241231", "21545231", "45512452", "44132442", "35545511", "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", "11111111", "11111111", "12", "12", "2", "0"];
 
-    // 💡 個人の統計をブラウザに保存するための変数
+    // --- 💡 個人の実績ロジック ---
     let myExecs = parseInt(localStorage.getItem('puyo_my_execs')) || 0;
     let myPatterns = parseInt(localStorage.getItem('puyo_my_patterns')) || 0;
 
@@ -129,7 +129,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-        updateStatsUI(); // 初回表示
+        updateStatsUI(); 
 
         // 入力欄生成
         const inputSection = document.getElementById('input-section');
@@ -169,7 +169,7 @@
     }
 
     function startSearch() {
-        // 💡 探索回数をカウントアップ
+        // 💡 個人の回数を増やす
         myExecs++;
         localStorage.setItem('puyo_my_execs', myExecs);
         updateStatsUI();
@@ -198,9 +198,9 @@
         }
     }
 
-    // 💡 WASMから呼ばれるパターン加算関数も個人用に変更
     window.addPatternCount = function(count) {
         if (!count || isNaN(count)) return;
+        // 💡 個人のパターン数を増やす
         myPatterns += Number(count);
         localStorage.setItem('puyo_my_patterns', myPatterns);
         updateStatsUI();
