@@ -170,9 +170,8 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
-
 
 <script>
     // 1. Firebase 初期化
@@ -186,26 +185,14 @@
         appId: "1:369432653847:web:d09f669ac2a8ef4e61ac52",
         measurementId: "G-1GYB847L0E"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 2. ラベルとヒントの定義
-    const inputLabels = [
-        "盤面行 1:", "盤面行 2:", "盤面行 3:", "盤面行 4:", "盤面行 5:", "盤面行 6:", 
-        "+行 1:", "+行 2:", "+行 3:", "+行 4:", "+行 5:", "+行 6:", 
-        "BE行 1:", "BE行 2:", "BE行 3:", "BE行 4:", "BE行 5:", "BE行 6:", 
-        "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間:", "未設定:"
-    ];
+    // 2. ラベルとヒント
+    const inputLabels = ["盤面行 1:", "盤面行 2:", "盤面行 3:", "盤面行 4:", "盤面行 5:", "盤面行 6:", "+行 1:", "+行 2:", "+行 3:", "+行 4:", "+行 5:", "+行 6:", "BE行 1:", "BE行 2:", "BE行 3:", "BE行 4:", "BE行 5:", "BE行 6:", "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間:", "未設定:"];
+    const placeholderHints = ["13121232", "25241231", "21545231", "45512452", "44132442", "35545511", "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", "11111111", "11111111", "12", "12", "30", "0"];
 
-    const placeholderHints = [
-        "13121232", "25241231", "21545231", "45512452", "44132442", "35545511", 
-        "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", 
-        "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", 
-        "11111111", "11111111", "12", "12", "30", "0"
-    ];
-
-    // 3. ページ読み込み時の処理
+    // 3. ページ読み込み完了時の処理
     window.addEventListener('DOMContentLoaded', () => {
         // 来場者数
         let visits = localStorage.getItem('puyo_visits') || 0;
@@ -213,69 +200,61 @@
         localStorage.setItem('puyo_visits', visits);
         document.getElementById('visitor-count').textContent = visits.toLocaleString();
 
-        // Firebase同期
-        db.ref('puyo_stats').on('value', (snapshot) => {
-            const data = snapshot.val() || { execs: 0, patterns: 0 };
-            document.getElementById('total-execs').textContent = data.execs.toLocaleString();
-            document.getElementById('total-patterns').textContent = data.patterns.toLocaleString();
+        // 統計同期
+        db.ref('puyo_stats').on('value', (s) => {
+            const d = s.val() || { execs: 0, patterns: 0 };
+            document.getElementById('total-execs').textContent = d.execs.toLocaleString();
+            document.getElementById('total-patterns').textContent = d.patterns.toLocaleString();
         });
 
-        // 入力欄の生成
-        const inputSection = document.getElementById('input-section');
-        inputSection.innerHTML = ""; 
+        // 入力欄生成
+        const section = document.getElementById('input-section');
+        section.innerHTML = "";
         for (let i = 0; i < 24; i++) {
-            const rowDiv = document.createElement('div');
-            rowDiv.className = 'input-row';
-            rowDiv.innerHTML = `<label class="input-label">${inputLabels[i]}</label><input type="text" maxlength="8" class="input-field" placeholder="${placeholderHints[i]}">`;
-            inputSection.appendChild(rowDiv);
+            const div = document.createElement('div');
+            div.className = 'input-row';
+            div.innerHTML = `<label class="input-label">${inputLabels[i]}</label><input type="text" maxlength="8" class="input-field" placeholder="${placeholderHints[i]}">`;
+            section.appendChild(div);
         }
 
-        // ★【追加】保存データの復元
-        const savedData = JSON.parse(localStorage.getItem('puyo_input_save'));
-        if (savedData) {
-            const inputs = document.querySelectorAll('.input-field');
-            inputs.forEach((input, idx) => {
-                if (savedData[idx]) input.value = savedData[idx];
+        // 保存データの復元
+        const saved = JSON.parse(localStorage.getItem('puyo_input_save'));
+        if (saved) {
+            document.querySelectorAll('.input-field').forEach((input, idx) => {
+                if (saved[idx]) input.value = saved[idx];
             });
         }
 
-        // 盤面生成
-        createExcelGrid('original-board');
-        createExcelGrid('output-board');
-        createExcelGrid('repaint-board-1');
-        createExcelGrid('repaint-board-2');
+        // 盤面グリッド生成
+        ['original-board', 'output-board', 'repaint-board-1', 'repaint-board-2'].forEach(id => createExcelGrid(id));
     });
 
-    function createExcelGrid(gridId) {
-        const grid = document.getElementById(gridId);
-        grid.innerHTML = "";
+    function createExcelGrid(id) {
+        const g = document.getElementById(id);
+        g.innerHTML = "";
         for (let r = 0; r <= 6; r++) {
             for (let c = 0; c <= 8; c++) {
                 const cell = document.createElement('div');
                 if (r === 0 && c === 0) { cell.className = 'cell origin-cell'; cell.textContent = '行\\列'; }
                 else if (r === 0) { cell.className = 'cell header-cell'; cell.textContent = c; }
                 else if (c === 0) { cell.className = 'cell header-cell'; cell.style.width = '45px'; cell.textContent = r; }
-                else { 
-                    cell.className = 'cell data-cell'; 
-                    cell.id = `${gridId}-cell-${(r-1)*8 + (c-1)}`; 
-                }
-                grid.appendChild(cell);
+                else { cell.className = 'cell data-cell'; cell.id = `${id}-cell-${(r-1)*8 + (c-1)}`; }
+                g.appendChild(cell);
             }
         }
     }
 
-    // 4. 探索実行
+    // 4. 解析エンジンの呼び出し
     function startSearch() {
+        // 回数加算
         db.ref('puyo_stats/execs').transaction(c => (c || 0) + 1);
 
         const inputs = document.querySelectorAll('.input-field');
+        
+        // 保存処理
+        localStorage.setItem('puyo_input_save', JSON.stringify(Array.from(inputs).map(i => i.value)));
 
-        // ★【追加】入力値をローカル保存
-        const currentValues = Array.from(inputs).map(i => i.value);
-        localStorage.setItem('puyo_input_save', JSON.stringify(currentValues));
-
-        // データの組み立て
-        // 💡 (i, index) と書くことで、indexが使えるようになります！
+        // 💡 修正ポイント：(i, index) と書くことで index を使えるようにしました
         const combinedData = Array.from(inputs).map((i, index) => {
             let val = i.value || placeholderHints[index] || "0";
             return val.padStart(8, '0');
@@ -284,16 +263,14 @@
         if (typeof Module !== 'undefined' && Module.ccall) {
             Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
         } else {
-            alert("解析エンジンの準備中です。");
+            alert("解析エンジンを読み込み中です。数秒待ってからやり直してください。");
         }
     }
 
-    // C言語側からのコールバック
-    window.addPatternCount = function(count) {
-        db.ref('puyo_stats/patterns').transaction(c => (c || 0) + count);
-    };
-
-    window.updateUICell = function(gridId, index, colorIndex, isPlus = 0, isBonus = 0) {
+    // 5. C言語側からの窓口 (windowに登録)
+    window.addPatternCount = (count) => db.ref('puyo_stats/patterns').transaction(c => (c || 0) + count);
+    
+    window.updateUICell = (gridId, index, colorIndex, isPlus = 0, isBonus = 0) => {
         const cell = document.getElementById(`${gridId}-cell-${index}`);
         if (!cell) return;
         const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ff3eff"];
@@ -304,14 +281,14 @@
         cell.textContent = text;
     };
 
-    window.updateUITrace = function(row, col, colorIndex) {
+    window.updateUITrace = (row, col, colorIndex) => {
         const colorCodes = ["#ccc", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ff3eff"];
         const target = document.getElementById('trace-result');
         const colorCode = colorCodes[colorIndex] || "#fff";
         target.innerHTML = `${row} 行 ${col} 列 <span style="color: ${colorCode}; margin-left: 12px; font-size: 1.2em; text-shadow: 0 0 10px ${colorCode};">●</span>`;
     };
 </script>
-<script src="puyosim.js"></script>
+
     <script src="puyosim.js"></script>
 </body>
 </html>
