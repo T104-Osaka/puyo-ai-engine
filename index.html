@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ぷよクエ解析シミュレーター</title>
     <style>
-        /* CSS部分は変更なしのため維持 */
+        /* デザイン部分は変更なし */
         body { background: linear-gradient(135deg, #2c3e50 0%, #000000 100%); color: white; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 20px; line-height: 1.3; min-height: 100vh; }
         h1 { color: #f1c40f; text-shadow: 2px 2px #d35400; font-size: 1.8em; text-align: center; margin-bottom: 20px; }
         .usage-section { background-color: rgba(52, 73, 94, 0.8); padding: 15px; border-radius: 10px; border-left: 6px solid #f1c40f; max-width: 1400px; margin: 0 auto 20px auto; font-size: 0.85em; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
@@ -46,7 +46,7 @@
 
     <div class="usage-section">
         <strong>💡 統計システム稼働状況</strong><br>
-        数値が0のまま動かない場合は、Firebaseの「ルール」が許可されているか確認してください。
+        数値が0のまま動かない場合は、Firebaseの「ルール」設定を確認してください。
     </div>
 
     <div class="wrapper">
@@ -112,9 +112,8 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // 💡 修正：文法エラーを削除し、WebSocketを強制
     db.setForceWebSockets(true);
-    db.ref('puyo_stats').on('value', (snapshot) => { ... });
-    // 💡 接続を強制的に確立させる（アジアサーバーで有効な設定）
     db.goOnline();
 
     const inputLabels = ["盤面行 1:", "盤面行 2:", "盤面行 3:", "盤面行 4:", "盤面行 5:", "盤面行 6:", "+行 1:", "+行 2:", "+行 3:", "+行 4:", "+行 5:", "+行 6:", "BE行 1:", "BE行 2:", "BE行 3:", "BE行 4:", "BE行 5:", "BE行 6:", "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間:", "未設定:"];
@@ -124,24 +123,19 @@
         // --- 📊 全統計のリアルタイム受信 ---
         db.ref('puyo_stats').on('value', (snapshot) => {
             const data = snapshot.val();
-            console.log("🔥 Firebase Data Received:", data); // デバッグ用
             if (data) {
                 document.getElementById('visitor-count').textContent = (data.visitors || 0).toLocaleString();
                 document.getElementById('total-execs').textContent = (data.execs || 0).toLocaleString();
                 document.getElementById('total-patterns').textContent = (data.patterns || 0).toLocaleString();
             }
-        }, (error) => {
-            console.error("❌ Firebase Read Error:", error);
         });
 
         // --- 🚀 来場者数の加算（セッション中1回） ---
         if (!sessionStorage.getItem('puyo_visited')) {
             db.ref('puyo_stats/visitors').set(firebase.database.ServerValue.increment(1))
-              .then(() => sessionStorage.setItem('puyo_visited', 'true'))
-              .catch(e => console.error("❌ Visitor Count Error:", e));
+              .then(() => sessionStorage.setItem('puyo_visited', 'true'));
         }
 
-        // 初期UI生成
         const inputSection = document.getElementById('input-section');
         for (let i = 0; i < 24; i++) {
             const rowDiv = document.createElement('div');
@@ -179,9 +173,7 @@
     }
 
     function startSearch() {
-        // 探索回数をインクリメント
         db.ref('puyo_stats/execs').set(firebase.database.ServerValue.increment(1));
-        
         const inputs = document.querySelectorAll('.input-field');
         const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
 
