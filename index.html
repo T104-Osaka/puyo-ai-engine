@@ -310,11 +310,16 @@ const placeholderHints = [
             cell.style.backgroundColor = colors[colorIndex] || "rgba(255,255,255,0.05)";
         }
         
-        // 📝 記号のみ表示
-        let text = "";
-        if (isPlus) text += "+";
-        if (isBonus) text += "B";
-        cell.textContent = text;
+// 📝 記号の表示制御
+        let text = "";
+
+        // 💡 ここを追加！ 塗り替え後の盤面（output-board）以外の場合のみ、記号を設定する
+        if (gridId !== "output-board") {
+            if (isPlus) text += "+";
+            if (isBonus) text += "B";
+        }
+
+        cell.textContent = text;
     }
 
     function updateUITrace(row, col, colorIndex) {
