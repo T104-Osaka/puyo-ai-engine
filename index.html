@@ -281,10 +281,11 @@ const placeholderHints = [
 }
 
     // C言語側から呼ばれるパターン数加算
-    function addPatternCount(count) {
-        // 全員の総パターン数に加算
-        db.ref('puyo_stats/patterns').transaction(c => (c || 0) + count);
-    }
+    window.addPatternCount = function(count) {
+        if (!count) return;
+        console.log("C言語から届いたパターン数:", count); // デバッグ用
+        db.ref('puyo_stats/patterns').transaction(c => (c || 0) + Number(count));
+    };
 
     // =========================================
     // 4. UI更新 (色・記号)
