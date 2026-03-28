@@ -284,7 +284,8 @@ const placeholderHints = [
         let val = i.value || internalHints[n++] || "0";
         return val.padStart(8, '0'); // 8桁になるまで左側を"0"で埋める
     }).join(",");
-
+console.log("C言語へ送るデータ:", combinedData);
+        
     if (typeof Module !== 'undefined' && Module.ccall) {
         Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
     }
