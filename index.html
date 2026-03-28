@@ -175,7 +175,7 @@
 
 <script>
     // =========================================
-    // 1. Firebase 設定と初期化
+    // 1. Firebase 設定（変更なし）
     // =========================================
     const firebaseConfig = {
         apiKey: "AIzaSyBxMptE0LD0sBSbJq1D3YHaM0hy36zu05g",
@@ -192,39 +192,26 @@
     const db = firebase.database();
 
     // =========================================
-    // 2. グローバル変数と初期化処理 (UI生成)
+    // 2. ラベルとヒントの定義
     // =========================================
-    const inputLabels = [
-        "盤面行 1:", "盤面行 2:", "盤面行 3:", "盤面行 4:", "盤面行 5:", "盤面行 6:", 
-        "+行 1:", "+行 2:", "+行 3:", "+行 4:", "+行 5:", "+行 6:", 
-        "BE行 1:", "BE行 2:", "BE行 3:", "BE行 4:", "BE行 5:", "BE行 6:", 
-        "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間(秒):", "未設定:"
-    ];
+    const inputLabels = ["盤面行 1:", "盤面行 2:", "盤面行 3:", "盤面行 4:", "盤面行 5:", "盤面行 6:", "+行 1:", "+行 2:", "+行 3:", "+行 4:", "+行 5:", "+行 6:", "BE行 1:", "BE行 2:", "BE行 3:", "BE行 4:", "BE行 5:", "BE行 6:", "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間:", "未設定:"];
+    const placeholderHints = ["13121232", "25241231", "21545231", "45512452", "44132442", "35545511", "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", "11111111", "11111111", "12", "12", "2", "0"];
 
-    // 💡 【追加】 個別のヒント（24個分）
-const placeholderHints = [
-    "13121232", "25241231", "21545231", "45512452", "44132442", "35545511", // 盤面
-    "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", // プラス
-    "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", // BE
-    "11111111", "11111111", "12", "12", "2", "0"              // 特殊項目
-];
-
-    // ページ読み込み完了時に実行
     window.addEventListener('DOMContentLoaded', () => {
-        // --- A. 来場者数 (自分専用) ---
+        // 来場者数
         let visits = localStorage.getItem('puyo_visits') || 0;
         visits++;
         localStorage.setItem('puyo_visits', visits);
         document.getElementById('visitor-count').textContent = visits.toLocaleString();
 
-        // --- B. 全員の合計統計をリアルタイムに受け取る ---
+        // 統計同期
         db.ref('puyo_stats').on('value', (snapshot) => {
             const data = snapshot.val() || { execs: 0, patterns: 0 };
             document.getElementById('total-execs').textContent = data.execs.toLocaleString();
             document.getElementById('total-patterns').textContent = data.patterns.toLocaleString();
         });
 
-        // --- C. 入力欄 24個を生成 ---
+        // 入力欄生成
         const inputSection = document.getElementById('input-section');
         inputSection.innerHTML = ""; 
         for (let i = 0; i < 24; i++) {
@@ -234,14 +221,13 @@ const placeholderHints = [
             inputSection.appendChild(rowDiv);
         }
 
-        // --- D. 盤面グリッドを生成 ---
+        // 盤面生成
         createExcelGrid('original-board');
         createExcelGrid('output-board');
         createExcelGrid('repaint-board-1');
         createExcelGrid('repaint-board-2');
     });
 
-    // 盤面をHTMLとして組み立てる関数
     function createExcelGrid(gridId) {
         const grid = document.getElementById(gridId);
         grid.innerHTML = ""; 
@@ -251,82 +237,56 @@ const placeholderHints = [
                 if (r === 0 && c === 0) { cell.className = 'cell origin-cell'; cell.textContent = '行\\列'; }
                 else if (r === 0) { cell.className = 'cell header-cell'; cell.textContent = c; }
                 else if (c === 0) { cell.className = 'cell header-cell'; cell.style.width = '45px'; cell.textContent = r; }
-                else { 
-                    cell.className = 'cell data-cell'; 
-                    cell.id = `${gridId}-cell-${(r-1)*8 + (c-1)}`; 
-                }
+                else { cell.className = 'cell data-cell'; cell.id = `${gridId}-cell-${(r-1)*8 + (c-1)}`; }
                 grid.appendChild(cell);
             }
         }
     }
 
     // =========================================
-    // 3. 探索実行と統計の送信
+    // 3. 探索実行（ここを修正しました）
     // =========================================
     function startSearch() {
-    // 統計を増やす処理（省略）
-    db.ref('puyo_stats/execs').transaction(c => (c || 0) + 1);
+        db.ref('puyo_stats/execs').transaction(c => (c || 0) + 1);
 
-    const inputs = document.querySelectorAll('.input-field');
-    
-    // 💡 ここがポイント！ .padStart(8, '0') を追加
-    const combinedData = Array.from(inputs).map(i => {
-        // 💡 内部に手入力で用意した24個の配列
-        const hints = [
-            "13121232", "25241231", "21545231", "45512452", "44132442", "35545511", // 盤面
-            "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", // プラス
-            "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", // BE
-            "11111111", "11111111", "12", "12", "30", "0"                         // 特殊項目
-        ];
+        const inputs = document.querySelectorAll('.input-field');
+        
+        // 💡 ポイント：(i) を (i, index) に変えることで、何番目の入力欄か判断します
+        const combinedData = Array.from(inputs).map((i, index) => {
+            // 優先順位：1.入力された値  2.半透明のヒント  3.最後の手段の"0"
+            let val = i.value || placeholderHints[index] || "0";
+            return val.padStart(8, '0');
+        }).join(",");
 
-        // 💡 引数の i (入力欄) が、全体の中で何番目にあるかを indexOf で探す
-        const idx = Array.from(inputs).indexOf(i);
-
-        // 入力が空なら、hints配列の idx 番目を使う
-        let val = i.value || hints[idx] || "0";
-        return val.padStart(8, '0');
-    }).join(",");
-}
-
-    // C言語側から呼ばれるパターン数加算
-    function addPatternCount(count) {
-        // 全員の総パターン数に加算
-        db.ref('puyo_stats/patterns').transaction(c => (c || 0) + count);
+        if (typeof Module !== 'undefined' && Module.ccall) {
+            Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
+        }
     }
 
     // =========================================
-    // 4. UI更新 (色・記号)
+    // 4. WASM 連携用（確実に window に登録）
     // =========================================
-    function updateUICell(gridId, index, colorIndex, isPlus = 0, isBonus = 0) {
+    window.addPatternCount = function(count) {
+        db.ref('puyo_stats/patterns').transaction(c => (c || 0) + count);
+    };
+
+    window.updateUICell = function(gridId, index, colorIndex, isPlus = 0, isBonus = 0) {
         const cell = document.getElementById(`${gridId}-cell-${index}`);
         if (!cell) return;
-
         const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ff3eff"];
-        
-        // 🌸 空（0）を白っぽいピンクにする
-        if (colorIndex === 0 && (gridId === "original-board" || gridId === "output-board")) {
-            cell.style.backgroundColor = "#ffdae9"; 
-        } else {
-            cell.style.backgroundColor = colors[colorIndex] || "rgba(255,255,255,0.05)";
-        }
-        
-        // 📝 記号のみ表示
+        cell.style.backgroundColor = (colorIndex === 0 && (gridId === "original-board" || gridId === "output-board")) ? "#ffdae9" : (colors[colorIndex] || "rgba(255,255,255,0.05)");
         let text = "";
         if (isPlus) text += "+";
         if (isBonus) text += "B";
         cell.textContent = text;
-    }
+    };
 
-    function updateUITrace(row, col, colorIndex) {
+    window.updateUITrace = function(row, col, colorIndex) {
         const colorCodes = ["#ccc", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ff3eff"];
         const target = document.getElementById('trace-result');
         const colorCode = colorCodes[colorIndex] || "#fff";
-
-        target.innerHTML = `
-            ${row} 行 ${col} 列 
-            <span style="color: ${colorCode}; margin-left: 12px; font-size: 1.2em; text-shadow: 0 0 10px ${colorCode};">●</span>
-        `;
-    }
+        target.innerHTML = `${row} 行 ${col} 列 <span style="color: ${colorCode}; margin-left: 12px; font-size: 1.2em; text-shadow: 0 0 10px ${colorCode};">●</span>`;
+    };
 </script>
     <script src="puyosim.js"></script>
 </body>
