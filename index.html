@@ -113,6 +113,7 @@
     const db = firebase.database();
 
     db.setForceWebSockets(true);
+    db.ref('puyo_stats').on('value', (snapshot) => { ... });
     // 💡 接続を強制的に確立させる（アジアサーバーで有効な設定）
     db.goOnline();
 
