@@ -277,7 +277,7 @@ const placeholderHints = [
             "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", // BE
             "11111111", "11111111", "12", "12", "2", "0"                         // 特殊
         ];
-        let val = i.value || internalHints[idx] || "0";
+        let val = i.value || internalHints[i] || "0";
         return val.padStart(8, '0'); // 8桁になるまで左側を"0"で埋める
     }).join(",");
 
