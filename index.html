@@ -47,44 +47,51 @@
         
         .progress-inner { 
             width: 100%; height: 100%; 
-            /* 🚀 蛍光緑のベースグラデーション */
-            background: linear-gradient(180deg, #ccffcc 0%, #39ff14 50%, #00cc00 100%); 
+            /* ❌ 修正前: background: linear-gradient(90deg, #3498db, #2ecc71); */
+            /* ✅ 修正後: 蛍光色の緑のバー */
+            background: #39ff14; /* Neon Green */
+            
             transform: scaleX(0);    /* 最初は0倍 */
             transform-origin: left;  /* 左端固定 */
-            will-change: transform;  /* 描画チームに予告 */
-
-            /* 🚀 「太いバー（セグメント）」を作るテクスチャ */
-            /* 15pxおきに5pxの黒い隙間を作ってセグメント化する */
-            background-image: repeating-linear-gradient(
-                90deg,
-                transparent,
-                transparent 15px,
-                rgba(0, 0, 0, 0.6) 15px,
-                rgba(0, 0, 0, 0.6) 20px
-            );
-            background-size: 20px 100%; /* セグメントの幅 */
             
-            /* 🚀 フリーズ中も蛍光緑のブロックが流れ続ける（GPU処理） */
-            animation: move-segments 0.6s linear infinite; 
+            /* 🚀 動くストライプ模様（フリーズ対策） */
+            /* ❌ 修正前: 白の半透明と透明のストライプ */
+            /* ✅ 修正後: ストライプ全体を蛍光緑一色にする (以前のように白などの別の色は使わない、緑系の1つの模様にする) */
+            /* 背景と同じ蛍光緑の半透明ストライプを重ねる */
+            background-image: repeating-linear-gradient(
+                45deg,
+                rgba(57, 255, 20, 0.3) 25%, /* 背景と同じネオングリーンの半透明 */
+                transparent 25%,
+                transparent 50%,
+                rgba(57, 255, 20, 0.3) 50%,
+                rgba(57, 255, 20, 0.3) 75%,
+                transparent 75%,
+                transparent
+            );
+            background-size: 30px 30px;
+
+            /* 🚀 2つのアニメーションを同時にかける */
+            /* ①伸びる(growBar) ＋ ②ストライプが流れる(move-stripes) */
+            /* linear（一定速度）で動かし続ける */
+            animation: move-stripes 1s linear infinite; 
         }
 
-        /* 🚀 探索開始クラスがついた時だけ「伸びる」アニメーションを追加 */
+        /* 🚀 クラスがついた時だけ「伸びる」アニメーションを追加 */
+        /* JSでカスタムプロパティ --duration に秒数がセットされる前提 */
         .is-searching {
-            /* 伸びる(growBar) ＋ セグメントが流れる(move-segments) を合体 */
-            /* var(--duration)はJSから2秒、100秒などがセットされます */
-            animation: growBar var(--duration) linear forwards, move-segments 0.6s linear infinite !important;
+            /* 伸びる(growBar) ＋ ストライプが流れる(move-stripes) を合体 */
+            animation: growBar var(--duration) linear forwards, move-stripes 1s linear infinite !important;
         }
 
-        /* 🚀 CPUが死んでもGPUで勝手に動き続けるアニメーション */
         @keyframes growBar {
             from { transform: scaleX(0); }
             to { transform: scaleX(0.98); }
         }
 
-        /* 🚀 セグメント（太いバー）を横に流し続ける（GPU処理） */
-        @keyframes move-segments {
+        /* 🚀 ストライプを横に流し続ける（GPU処理なのでCPUフリーズ中も動く） */
+        @keyframes move-stripes {
             from { background-position: 0 0; }
-            to { background-position: 20px 0; } /* background-sizeと同じ分だけ動かす */
+            to { background-position: 30px 0; } /* background-sizeと同じ分だけ動かす */
         }
         
         /* メイン表示エリア */
