@@ -280,7 +280,6 @@
     myExecs++;
     localStorage.setItem('puyo_my_execs', myExecs);
     db.ref('puyo_stats/execs').set(firebase.database.ServerValue.increment(1));
-    updateStatsUI();
     document.getElementById('best-score-display').textContent = "探索中...";
 
     const inputs = document.querySelectorAll('.input-field');
