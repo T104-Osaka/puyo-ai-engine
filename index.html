@@ -32,12 +32,12 @@
             display: none; border: 1px solid #7f8c8d; 
         }
         .progress-inner { 
-            width: 100%; /* 🚀 最初から100%にしておき、縮尺で制御する */
+            width: 100%;            /* 棒自体は最初から100%にしておく */
             height: 100%; 
             background: linear-gradient(90deg, #3498db, #2ecc71); 
-            transform: scaleX(0); /* 🚀 最初は0倍（見えない） */
-            transform-origin: left; /* 🚀 左端を固定して伸びるようにする */
-            will-change: transform; /* 🚀 描画チームに「これ動かすよ」と予告する */
+            transform: scaleX(0);    /* 横幅を0倍（見えない状態）にする */
+            transform-origin: left;  /* 左端を軸にして伸びるようにする */
+            will-change: transform;  /* 描画チームに予告する */
         }
 
         /* 🚀 計算中も絶対に止まらないアニメーション */
@@ -286,13 +286,13 @@ function finishProgressBar() {
     const container = document.getElementById('progress-container');
     const bar = document.getElementById('progress-bar');
     
-    // アニメーションを止めて、一気に100%へ
+    // 🚀 アニメーションを止めて、強制的に「1倍（100%）」にする
     bar.style.animation = 'none';
-    bar.style.width = '100%';
+    bar.style.transform = 'scaleX(1)';
     
     setTimeout(() => {
         container.style.display = 'none';
-        bar.style.width = '0%';
+        bar.style.transform = 'scaleX(0)'; // 次回のために戻しておく
     }, 800);
 }
 
