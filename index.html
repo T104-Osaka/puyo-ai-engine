@@ -111,6 +111,27 @@
         #trace-result { font-size: 1.3em; font-weight: bold; color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
         .btn { background: linear-gradient(to bottom, #e74c3c, #c0392b); color: white; padding: 12px; border: none; border-radius: 30px; cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px #952d23; }
         .btn:active { transform: translateY(2px); box-shadow: 0 2px #952d23; }
+        .purpose-section {
+    max-width: 1400px;
+    margin: 40px auto 10px auto; /* 下の掲示板との隙間を少し狭くしています */
+    background-color: #34495e;
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 6px solid #3498db; /* 左側に青いアクセントライン */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+    .purpose-title {
+    font-size: 1.1em;
+    color: #3498db;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.purpose-text {
+    font-size: 0.95em;
+    line-height: 1.6;
+    color: #ecf0f1;
+}
 
         /* 統計コンテナ */
         .stats-container { max-width: 1000px; margin: 40px auto 10px auto; display: flex; gap: 20px; justify-content: center; }
@@ -128,8 +149,9 @@
     <h1> ぷよクエ解析シミュレーター </h1>
 
     <div class="usage-section">
-        <strong>💡 解析結果の確認</strong><br>
-        現在製作中
+        <strong>💡 使い方ガイド</strong><br>
+        
+        
     </div>
 
     <div class="wrapper">
@@ -177,10 +199,24 @@
         <div class="stat-card"><div class="stat-label">総探索回数</div><div id="total-execs" class="stat-value">0</div></div>
         <div class="stat-card"><div class="stat-label">総探索パターン数</div><div id="total-patterns" class="stat-value">0</div></div>
     </div>
+    <div class="purpose-section">
+    <div class="purpose-title">🧪 開発目的</div>
+    <div class="purpose-text">
+        主に目的は3つあります<br>
+        1つ目は、以前YouTubeにてぷよぷよクエストのぷよつかい大会でぬりかえスキルを使うときに、兎に角たくさん塗り替えてから潤沢ななぞり消し数を活かし、1連鎖でたくさんぷよを消そうとしているのを目撃しました　
+        私としては、パズルゲームなのだから連鎖とかをしっかり繋げ,盤面のぷよを1つ1つ大切にしたいという思いがあります　
+        そこで、少しシミュレートして自分と同じくらいのスコアが出てしまえば、周回効率を意識し作業になってしまったゲームが、どうすれば上手く連鎖し高得点を狙えるかを毎ターン考える楽しいゲームに変わり、ただ強いキャラを入れるだけで何も考えずにクエストをする状況から、上手くぬりかえるコツなどを語らいあうように変われると考えたからです<br>
+        2つ目は、自分のぬりかえ能力がどれほどか知りたいという興味からです　
+        ぬりかえキャラを2体入れれば、ぬりかえパターンは8×10^19なので、普通のパソコンで頑張ってシミュレートしてもせいぜい数ppbしか探索できないため、ランダムにパソコンで探索するよりもまだ人が考えた方が点数が良くなるだろうということを検証するためにしています<br>
+        3つ目は、テスト期間など忙しい人がとりあえずそこそこのスコアを手軽にとれるようにし、ある程度のランキングに入れるようにすることで、ゲームがしたいという欲望を少しでも抑えられるようにするためです　
+        私はテスト期間中でも、5000位以内には入りたいなど思い、ぷよクエをしていたので、これで解決するといいなと考えてます<br>
+        以上が私の開発目的です
+    </div>
+</div>
 
     <div class="comment-section">
         <div style="font-size: 1.1em; color: #3498db; font-weight: bold;">💬 掲示板 / フィードバック</div>
-        <textarea class="comment-textarea" placeholder="メッセージを入力..."></textarea>
+        <textarea class="comment-textarea" placeholder="実装したいと思っていますがまだできていません<br>要望やバグ報告があれば、Twitterで #ぷよクエ解析シム などのタグを付けて呟いていただけると助かります<br>見つけたら可能な範囲で修正するつもりです<br>しがない基礎工学部生が学業の合間に作っているものなので、のんびり改善していく予定です"></textarea>
         <div style="text-align: right;"><button class="submit-btn">送信する</button></div>
     </div>
 
