@@ -32,13 +32,18 @@
             display: none; border: 1px solid #7f8c8d; 
         }
         .progress-inner { 
-            width: 0%; height: 100%; 
+            width: 100%; /* 🚀 最初から100%にしておき、縮尺で制御する */
+            height: 100%; 
             background: linear-gradient(90deg, #3498db, #2ecc71); 
+            transform: scaleX(0); /* 🚀 最初は0倍（見えない） */
+            transform-origin: left; /* 🚀 左端を固定して伸びるようにする */
+            will-change: transform; /* 🚀 描画チームに「これ動かすよ」と予告する */
         }
-        /*  計算中も止まらないアニメーション */
+
+        /* 🚀 計算中も絶対に止まらないアニメーション */
         @keyframes growBar {
-            from { width: 0%; }
-            to { width: 98%; }
+            from { transform: scaleX(0); }
+            to { transform: scaleX(0.98); }
         }
         /* メイン表示エリア */
         .main-display { display: flex; flex-direction: column; gap: 25px; }
