@@ -102,8 +102,9 @@
     </div>
 
     <div class="stats-container">
-        <div class="stat-card"><div class="stat-label">あなたの総探索回数</div><div id="total-execs" class="stat-value">0</div></div>
-        <div class="stat-card"><div class="stat-label">あなたの総探索パターン数</div><div id="total-patterns" class="stat-value">0</div></div>
+        <div class="stat-card"><div class="stat-label">来場者数</div><div id="visitor-count" class="stat-value">0</div></div>
+        <div class="stat-card"><div class="stat-label">総探索回数</div><div id="total-execs" class="stat-value">0</div></div>
+        <div class="stat-card"><div class="stat-label">総探索パターン数</div><div id="total-patterns" class="stat-value">0</div></div>
     </div>
 
     <div class="comment-section">
@@ -153,6 +154,22 @@
     };
 
     window.addEventListener('DOMContentLoaded', () => {
+        // --- 📊 全統計（来場者・全員の探索数）をリアルタイムで受信 ---
+    db.ref('puyo_stats').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            document.getElementById('visitor-count').textContent = (data.visitors || 0).toLocaleString();
+            document.getElementById('total-execs').textContent = (data.execs || 0).toLocaleString();
+            document.getElementById('total-patterns').textContent = (data.patterns || 0).toLocaleString();
+        }
+    });
+
+    // --- 👣 来場者数のカウントアップ（セッション中1回のみ） ---
+    if (!sessionStorage.getItem('puyo_visited')) {
+        db.ref('puyo_stats/visitors').set(firebase.database.ServerValue.increment(1))
+          .then(() => sessionStorage.setItem('puyo_visited', 'true'))
+          .catch(e => console.error("Firebase Visitors Error:", e));
+    }
         updateStatsUI(); 
         const inputSection = document.getElementById('input-section');
         for (let i = 0; i < 24; i++) {
@@ -219,9 +236,7 @@
 
     window.addPatternCount = function(count) {
         if (!count || isNaN(count)) return;
-        myPatterns += Number(count);
-        localStorage.setItem('puyo_my_patterns', myPatterns);
-        updateStatsUI();
+        db.ref('puyo_stats/patterns').set(firebase.database.ServerValue.increment(Number(count)));
     };
 
     window.updateUICell = function(gridId, index, colorIndex, isPlus = 0, isBonus = 0) {
@@ -247,6 +262,14 @@
         const colorCode = colorCodes[colorIndex] || "#fff";
         target.innerHTML = `${row} 行 ${col} 列 <span style="color: ${colorCode}; margin-left: 12px; font-size: 1.2em; text-shadow: 0 0 10px ${colorCode};">●</span>`;
     };
+    window.showNoResult = function() {
+    const display = document.getElementById('best-score-display');
+    display.textContent = "発見できず";
+    display.style.color = "#e74c3c"; // 警告色（赤色）に変えるとおしゃれ
+
+    // なぞり位置の表示もリセットする
+    document.getElementById('trace-result').textContent = "-- 行 -- 列";
+};
 </script>
 <script src="puyosim.js"></script>
 </body>
