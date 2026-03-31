@@ -231,7 +231,7 @@
         "13121232", "25241231", "21545231", "45512452", "44132442", "35545511", 
         "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", 
         "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", 
-        "11111111", "11111111", "12", "12", "20", "0",
+        "11111111", "11111111", "12", "12", "2", "0",
         "0", "0", "0", "0", "0", "0", 
         "0", "0", "0", "0", "0", "0"
     ];
@@ -303,7 +303,7 @@
         myExecs++;
         localStorage.setItem('puyo_my_execs', myExecs);
         db.ref('puyo_stats/execs').set(firebase.database.ServerValue.increment(1));
-        document.getElementById('best-score-display').textContent = "探索中...";
+        document.getElementById('best-score-display').textContent = "探索中";
 
         const inputs = document.querySelectorAll('.input-field');
         const timeLimit = parseInt(inputs[22].value || placeholderHints[22]);
