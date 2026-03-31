@@ -21,88 +21,45 @@
         .usage-section { background-color: rgba(52, 73, 94, 0.8); padding: 15px; border-radius: 10px; border-left: 6px solid #f1c40f; max-width: 1400px; margin: 0 auto 20px auto; font-size: 0.85em; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .wrapper { display: flex; gap: 30px; justify-content: center; max-width: 1800px; margin: 0 auto; align-items: flex-start; }
         
-        /* サイド入力エリア */
-        .side-input { flex: 0 0 380px; background-color: #34495e; padding: 15px; border-radius: 10px; border: 1px solid #7f8c8d; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(12, 1fr); grid-auto-flow: column; column-gap: 20px; row-gap: 6px; }
-        .input-row { display: flex; align-items: center; justify-content: space-between; }
-        .input-label { width: 75px; text-align: right; margin-right: 8px; font-size: 11px; color: #bdc3c7; white-space: nowrap; }
-        .input-field { width: 85px; height: 22px; font-size: 13px; text-align: center; border-radius: 4px; border: 1px solid #bdc3c7; background: #ecf0f1; }
+        /* サイド入力エリア (380px固定) */
+        .side-input { flex: 0 0 380px; background-color: #34495e; padding: 15px; border-radius: 10px; border: 1px solid #7f8c8d; box-shadow: 0 4px 15px rgba(0,0,0,0.3); box-sizing: border-box; }
         
-        /* 🚀 最高得点表示エリア（入力の下） */
+        /* 🚀 3列構成への変更 */
+        .input-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            grid-template-rows: repeat(12, 1fr); 
+            grid-auto-flow: column; 
+            column-gap: 8px; 
+            row-gap: 6px; 
+        }
+        .input-row { display: flex; align-items: center; justify-content: space-between; }
+        
+        /* 🚀 3列に収めるための幅調整 */
+        .input-label { width: 45px; text-align: right; margin-right: 4px; font-size: 10px; color: #bdc3c7; white-space: nowrap; overflow: hidden; }
+        .input-field { width: 62px; height: 22px; font-size: 12px; text-align: center; border-radius: 4px; border: 1px solid #bdc3c7; background: #ecf0f1; padding: 0; }
+        
+        /* 🚀 最高得点表示エリア */
         .best-score-container { 
             margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; 
             border: 2px solid #f1c40f; text-align: center; box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.2);
         }
         .best-score-label { font-size: 0.8em; color: #f1c40f; font-weight: bold; margin-bottom: 5px; }
         .best-score-value { font-size: 2em; font-weight: bold; color: #fff; text-shadow: 0 0 10px #f1c40f; font-family: 'Courier New', monospace; }
-        /* プログレスバーのスタイル */
+
+        /* プログレスバー */
         .progress-outer { 
-            width: 100%; height: 14px; background: #1a1a1a; 
-            border-radius: 7px; margin-top: 15px; overflow: hidden; 
-            display: none; border: 1px solid #7f8c8d; 
+            width: 100%; height: 18px; background: #000; border-radius: 4px; margin-top: 15px; 
+            overflow: hidden; display: none; border: 2px solid #39ff14; 
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.5); position: relative;
         }
-        /* 🚀 ゲームのダウンロード風：蛍光緑セグメントバー */
-        .progress-outer { 
-            width: 100%; 
-            height: 18px; /* 🚀 少し太くして存在感を出す */
-            background: #000; /* 背景を黒にして蛍光緑を目立たせる */
-            border-radius: 4px; /* ゲーム風に角を少し尖らせる */
-            margin-top: 15px; 
-            overflow: hidden; 
-            display: none; 
-            border: 2px solid #39ff14; /* 蛍光緑の枠 */
-            box-shadow: 0 0 10px rgba(57, 255, 20, 0.5); /* 🚀 ネオンのように光らせる */
-            position: relative;
-        }
-        
         .progress-inner { 
-            width: 100%; height: 100%; 
-            /* ❌ 修正前: background: linear-gradient(90deg, #3498db, #2ecc71); */
-            /* ✅ 修正後: 蛍光色の緑のバー */
-            background: #39ff14; /* Neon Green */
-            
-            transform: scaleX(0);    /* 最初は0倍 */
-            transform-origin: left;  /* 左端固定 */
-            
-            /* 🚀 動くストライプ模様（フリーズ対策） */
-            /* ❌ 修正前: 白の半透明と透明のストライプ */
-            /* ✅ 修正後: ストライプ全体を蛍光緑一色にする (以前のように白などの別の色は使わない、緑系の1つの模様にする) */
-            /* 背景と同じ蛍光緑の半透明ストライプを重ねる */
-            background-image: repeating-linear-gradient(
-                45deg,
-                rgba(57, 255, 20, 0.3) 25%, /* 背景と同じネオングリーンの半透明 */
-                transparent 25%,
-                transparent 50%,
-                rgba(57, 255, 20, 0.3) 50%,
-                rgba(57, 255, 20, 0.3) 75%,
-                transparent 75%,
-                transparent
-            );
-            background-size: 30px 30px;
-
-            /* 🚀 2つのアニメーションを同時にかける */
-            /* ①伸びる(growBar) ＋ ②ストライプが流れる(move-stripes) */
-            /* linear（一定速度）で動かし続ける */
-            animation: move-stripes 1s linear infinite; 
+            width: 100%; height: 100%; background: #39ff14; transform: scaleX(0); transform-origin: left; 
+            background-image: repeating-linear-gradient(45deg, rgba(57, 255, 20, 0.3) 25%, transparent 25%, transparent 50%, rgba(57, 255, 20, 0.3) 50%, rgba(57, 255, 20, 0.3) 75%, transparent 75%, transparent);
+            background-size: 30px 30px; animation: move-stripes 1s linear infinite; 
         }
-
-        /* 🚀 クラスがついた時だけ「伸びる」アニメーションを追加 */
-        /* JSでカスタムプロパティ --duration に秒数がセットされる前提 */
-        .is-searching {
-            /* 伸びる(growBar) ＋ ストライプが流れる(move-stripes) を合体 */
-            animation: growBar var(--duration) linear forwards, move-stripes 1s linear infinite !important;
-        }
-
-        @keyframes growBar {
-            from { transform: scaleX(0); }
-            to { transform: scaleX(0.98); }
-        }
-
-        /* 🚀 ストライプを横に流し続ける（GPU処理なのでCPUフリーズ中も動く） */
-        @keyframes move-stripes {
-            from { background-position: 0 0; }
-            to { background-position: 30px 0; } /* background-sizeと同じ分だけ動かす */
-        }
+        @keyframes growBar { from { transform: scaleX(0); } to { transform: scaleX(0.98); } }
+        @keyframes move-stripes { from { background-position: 0 0; } to { background-position: 30px 0; } }
         
         /* メイン表示エリア */
         .main-display { display: flex; flex-direction: column; gap: 25px; }
@@ -121,29 +78,11 @@
         #trace-result { font-size: 1.3em; font-weight: bold; color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
         .btn { background: linear-gradient(to bottom, #e74c3c, #c0392b); color: white; padding: 12px; border: none; border-radius: 30px; cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px #952d23; }
         .btn:active { transform: translateY(2px); box-shadow: 0 2px #952d23; }
-        .purpose-section {
-    max-width: 1400px;
-    margin: 40px auto 10px auto; /* 下の掲示板との隙間を少し狭くしています */
-    background-color: #34495e;
-    padding: 25px;
-    border-radius: 12px;
-    border-left: 6px solid #3498db; /* 左側に青いアクセントライン */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-    .purpose-title {
-    font-size: 1.1em;
-    color: #3498db;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
+        
+        .purpose-section { max-width: 1400px; margin: 40px auto 10px auto; background-color: #34495e; padding: 25px; border-radius: 12px; border-left: 6px solid #3498db; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .purpose-title { font-size: 1.1em; color: #3498db; font-weight: bold; margin-bottom: 10px; }
+        .purpose-text { font-size: 0.95em; line-height: 1.6; color: #ecf0f1; }
 
-.purpose-text {
-    font-size: 0.95em;
-    line-height: 1.6;
-    color: #ecf0f1;
-}
-
-        /* 統計コンテナ */
         .stats-container { max-width: 1000px; margin: 40px auto 10px auto; display: flex; gap: 20px; justify-content: center; }
         .stat-card { flex: 1; max-width: 400px; background-color: #34495e; padding: 15px; border-radius: 10px; border-bottom: 3px solid #3498db; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .stat-label { font-size: 0.8em; color: #bdc3c7; margin-bottom: 5px; font-weight: bold; }
@@ -215,45 +154,46 @@
         <div class="stat-card"><div class="stat-label">総探索回数</div><div id="total-execs" class="stat-value">0</div></div>
         <div class="stat-card"><div class="stat-label">総探索パターン数</div><div id="total-patterns" class="stat-value">0</div></div>
     </div>
+
     <div class="purpose-section">
-    <div class="purpose-title">🧪 開発目的</div>
-    <div class="purpose-text">
-        開発動機は主に3つあります<br>
-        1つ目は、以前YouTubeにてぷよつかい大会でぬりかえスキルを使うときに「とにかく大量に塗り替え、潤沢ななぞり消し数に任せて1連鎖で大量に消す」というプレイスタイルを目撃したことです.
-        私としては、パズルゲームなのだから連鎖をしっかり繋げ,盤面のぷよ1つ1つを大切にしたいという思いがあります.
-        そこで、このシミュレータで「連鎖を組むぬりかえ」の良さに気付き、いかに効率的で賢い塗り替え方を考えるかを重視してほしいと考えました.
-        こうすることで、「強いキャラの枚数がランキングに直結する」という考えを薄め、盤面全体を上手く巻き込んだ「美しいぬりかえ方」を探求する楽しみを見出すことで、より深くゲームを楽しめるようになってほしいと思っています.<br>
-        2つ目は、自分のぬりかえ能力がどれほどか知りたいという興味です.
-        ぬりかえキャラを2体入れれば、ぬりかえパターンは8×10^19なので、普通のパソコンで頑張ってシミュレートしてもせいぜい数ppbしか探索できないため、ランダムにパソコンで探索するよりもまだ人が考えた方が点数が良くなるだろうということを検証するためにしています.
-        実際に検証してみたところ、自分が15分考えて188点に対し、プログラムだと10億パターンを60秒でやって174点という結果になり、やはり人間の思考の鋭さを再認識しました.(htmlにするときに変換するときにマルチスレッドにする方法が分からなかったため、ここではこの5%ほどの速度です.また、考えた盤面はシミュレータにもともと入ってる半透明の数値です.)<br>
-        3つ目は、テスト期間など忙しい人がとりあえず「そこそこのスコア」を手軽にとれるようにし、ある程度のランキングに入れるようにすることで、ゲームがしたいという欲望を少しでも抑えられるようにするためです.
-        私自身、テスト期間中であっても「5,000位以内には入りたい」という思いから無理にプレイを続けてしまった経験があります。このツールを使うことで、同じような悩みを抱える人の状況を少しでも改善できればと考えています.<br>
-        以上が私の開発動機です.
+        <div class="purpose-title">🧪 開発目的</div>
+        <div class="purpose-text">
+            開発動機は主に3つあります<br>
+            1つ目は、以前YouTubeにてぷよつかい大会でぬりかえスキルを使うときに「とにかく大量に塗り替え、潤沢ななぞり消し数に任せて1連鎖で大量に消す」というプレイスタイルを目撃したことです.
+            私としては、パズルゲームなのだから連鎖をしっかり繋げ,盤面のぷよ1つ1つを大切にしたいという思いがあります.
+            そこで、このシミュレータで「連鎖を組むぬりかえ」の良さに気付き、いかに効率的で賢い塗り替え方を考えるかを重視してほしいと考えました.
+            こうすることで、「強いキャラの枚数がランキングに直結する」という考えを薄め、盤面全体を上手く巻き込んだ「美しいぬりかえ方」を探求する楽しみを見出すことで、より深くゲームを楽しめるようになってほしいと思っています.<br>
+            2つ目は、自分のぬりかえ能力がどれほどか知りたいという興味です.
+            ぬりかえキャラを2体入れれば、ぬりかえパターンは8×10^19なので、普通のパソコンで頑張ってシミュレートしてもせいぜい数ppbしか探索できないため、ランダムにパソコンで探索するよりもまだ人が考えた方が点数が良くなるだろうということを検証するためにしています.
+            実際に検証してみたところ、自分が15分考えて188点に対し、プログラムだと10億パターンを60秒でやって174点という結果になり、やはり人間の思考の鋭さを再認識しました.<br>
+            3つ目は、テスト期間など忙しい人がとりあえず「そこそこのスコア」を手軽にとれるようにし、ある程度のランキングに入れるようにすることで、ゲームがしたいという欲望を少しでも抑えられるようにするためです.
+            私自身、テスト期間中であっても「5,000位以内には入りたい」という思いから無理にプレイを続けてしまった経験があります。このツールを使うことで、同じような悩みを抱える人の状況を少しでも改善できればと考えています.<br>
+            以上が私の開発動機です.
+        </div>
     </div>
-</div>
 
     <div class="comment-section">
         <div style="font-size: 1.1em; color: #3498db; font-weight: bold;">💬 掲示板 / フィードバック</div>
-        <textarea class="comment-textarea" placeholder="実装したいと思っていますがまだできていません<br>要望やバグ報告があれば、Twitterで #ぷよクエ解析シム などのタグを付けて呟いていただけると助かります<br>見つけたら可能な範囲で修正するつもりです<br>しがない基礎工学部生が学業の合間に作っているものなので、のんびり改善していく予定ですのでのんびりとお待ちください"></textarea>
+        <textarea class="comment-textarea" placeholder="要望やバグ報告があれば、Twitterで #ぷよクエ解析シム などのタグを付けて呟いていただけると助かります。しがない基礎工学部生が学業の合間に作っているものなので、のんびり改善していく予定です。"></textarea>
         <div style="text-align: right;"><button class="submit-btn">送信する</button></div>
     </div>
-<div style="margin: 30px 0; padding: 20px; background-color: #1e1e1e; color: #d4d4d4; border-radius: 8px; font-family: 'Consolas', 'Monaco', monospace; border: 1px solid #333;">
-    <p style="color: #6a9955; margin-bottom: 15px;">/** 💡 ツールがお役に立ちましたら **/</p>
-    <p style="margin: 8px 0;">
-        <span style="color: #569cd6;">if</span> (tool_is_useful) {
-    </p>
-    <p style="margin: 8px 0 8px 20px;">
-        <span style="color: #ce9178;">give_feedback</span>(<a href="https://twitter.com/intent/tweet?hashtags=ぷよクエ解析シム" target="_blank" style="color: #4fc1ff; text-decoration: none;">"#ぷよクエ解析シム"</a>); <span style="color: #6a9955;">// 新機能の要望,バグ報告はこちら</span>
-    </p>
-    <p style="margin: 8px 0 8px 20px;">
-        <span style="color: #ce9178;">send_resource</span>(<a href="https://www.amazon.jp/hz/wishlist/ls/3PSSCX0U53CZP?ref_=wl_share" target="_blank" rel="noopener noreferrer" style="color: #ce9178; text-decoration: underline;">"Amazon_Wishlist"</a>); <span style="color: #6a9955;">// 開発者のやる気維持（チョコ代）</span>
-    </p>
-    <p style="margin: 8px 0;">
-        }
-    </p>
-    <p style="font-size: 0.8em; color: #888; margin-top: 15px; text-align: right;">System Status: Optimization complete.</p>
-</div>
-    
+
+    <div style="margin: 30px 0; padding: 20px; background-color: #1e1e1e; color: #d4d4d4; border-radius: 8px; font-family: 'Consolas', 'Monaco', monospace; border: 1px solid #333;">
+        <p style="color: #6a9955; margin-bottom: 15px;">/** 💡 ツールがお役に立ちましたら **/</p>
+        <p style="margin: 8px 0;">
+            <span style="color: #569cd6;">if</span> (tool_is_useful) {
+        </p>
+        <p style="margin: 8px 0 8px 20px;">
+            <span style="color: #ce9178;">give_feedback</span>(<a href="https://twitter.com/intent/tweet?hashtags=ぷよクエ解析シム" target="_blank" style="color: #4fc1ff; text-decoration: none;">"#ぷよクエ解析シム"</a>);
+        </p>
+        <p style="margin: 8px 0 8px 20px;">
+            <span style="color: #ce9178;">send_resource</span>(<a href="https://www.amazon.jp/hz/wishlist/ls/3PSSCX0U53CZP?ref_=wl_share" target="_blank" rel="noopener noreferrer" style="color: #ce9178; text-decoration: underline;">"Amazon_Wishlist"</a>);
+        </p>
+        <p style="margin: 8px 0;">
+            }
+        </p>
+        <p style="font-size: 0.8em; color: #888; margin-top: 15px; text-align: right;">System Status: Optimization complete.</p>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
@@ -278,48 +218,60 @@
     let myExecs = parseInt(localStorage.getItem('puyo_my_execs')) || 0;
     let myPatterns = parseInt(localStorage.getItem('puyo_my_patterns')) || 0;
 
-    const inputLabels = ["盤面行 1:", "盤面行 2:", "盤面行 3:", "盤面行 4:", "盤面行 5:", "盤面行 6:", "+行 1:", "+行 2:", "+行 3:", "+行 4:", "+行 5:", "+行 6:", "BE行 1:", "BE行 2:", "BE行 3:", "BE行 4:", "BE行 5:", "BE行 6:", "N盤面:", "N+:", "塗 1:", "塗 2:", "実行時間(秒):", "未設定:"];
-    const placeholderHints = ["13121232", "25241231", "21545231", "45512452", "44132442", "35545511", "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", "11111111", "11111111", "12", "12", "2", "0"];
+    // 🚀 36個に拡張
+    const inputLabels = [
+        "盤面行 1:", "盤面行 2:", "盤面行 3:", "盤面行 4:", "盤面行 5:", "盤面行 6:", 
+        "+行 1:", "+行 2:", "+行 3:", "+行 4:", "+行 5:", "+行 6:", 
+        "BE行 1:", "BE行 2:", "BE行 3:", "BE行 4:", "BE行 5:", "BE行 6:", 
+        "N盤面:", "N+:", "塗 1:", "塗 2:", "実時間:", "予備1:",
+        "予備2:", "予備3:", "予備4:", "予備5:", "予備6:", "予備7:", 
+        "予備8:", "予備9:", "予備10:", "予備11:", "予備12:", "予備13:"
+    ];
+    const placeholderHints = [
+        "13121232", "25241231", "21545231", "45512452", "44132442", "35545511", 
+        "10001001", "01100111", "01011101", "11011011", "11110011", "01111011", 
+        "00000000", "10001100", "11001010", "01000111", "01101011", "00110110", 
+        "11111111", "11111111", "12", "12", "20", "0",
+        "0", "0", "0", "0", "0", "0", 
+        "0", "0", "0", "0", "0", "0"
+    ];
 
-    
     function updateStatsUI() {
         document.getElementById('total-execs').textContent = myExecs.toLocaleString();
         document.getElementById('total-patterns').textContent = myPatterns.toLocaleString();
     }
 
-    // 🚀 最高得点を更新する関数（C言語のEM_ASMから呼ばれます）
     window.updateBestScore = function(score) {
         const display = document.getElementById('best-score-display');
         display.textContent = score.toLocaleString();
-        // 演出：高得点の時に色を一時的に変えるなど
         display.style.color = score > 150 ? "#f1c40f" : "#fff";
     };
 
     window.addEventListener('DOMContentLoaded', () => {
-        // --- 📊 全統計（来場者・全員の探索数）をリアルタイムで受信 ---
-    db.ref('puyo_stats').on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            document.getElementById('visitor-count').textContent = (data.visitors || 0).toLocaleString();
-            document.getElementById('total-execs').textContent = (data.execs || 0).toLocaleString();
-            document.getElementById('total-patterns').textContent = (data.patterns || 0).toLocaleString();
-        }
-    });
+        db.ref('puyo_stats').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                document.getElementById('visitor-count').textContent = (data.visitors || 0).toLocaleString();
+                document.getElementById('total-execs').textContent = (data.execs || 0).toLocaleString();
+                document.getElementById('total-patterns').textContent = (data.patterns || 0).toLocaleString();
+            }
+        });
 
-    // --- 👣 来場者数のカウントアップ（セッション中1回のみ） ---
-    if (!sessionStorage.getItem('puyo_visited')) {
-        db.ref('puyo_stats/visitors').set(firebase.database.ServerValue.increment(1))
-          .then(() => sessionStorage.setItem('puyo_visited', 'true'))
-          .catch(e => console.error("Firebase Visitors Error:", e));
-    }
+        if (!sessionStorage.getItem('puyo_visited')) {
+            db.ref('puyo_stats/visitors').set(firebase.database.ServerValue.increment(1))
+              .then(() => sessionStorage.setItem('puyo_visited', 'true'))
+              .catch(e => console.error("Firebase Visitors Error:", e));
+        }
         updateStatsUI(); 
+
         const inputSection = document.getElementById('input-section');
-        for (let i = 0; i < 24; i++) {
+        for (let i = 0; i < 36; i++) {
             const rowDiv = document.createElement('div');
             rowDiv.className = 'input-row';
             rowDiv.innerHTML = `<label class="input-label">${inputLabels[i]}</label><input type="text" maxlength="8" class="input-field" placeholder="${placeholderHints[i]}">`;
             inputSection.appendChild(rowDiv);
         }
+
         const nextRow = document.getElementById('next-puyo-row');
         for (let i = 0; i < 8; i++) {
             const cell = document.createElement('div');
@@ -348,73 +300,61 @@
     }
 
     function startSearch() {
-    myExecs++;
-    localStorage.setItem('puyo_my_execs', myExecs);
-    db.ref('puyo_stats/execs').set(firebase.database.ServerValue.increment(1));
-    document.getElementById('best-score-display').textContent = "探索中...";
+        myExecs++;
+        localStorage.setItem('puyo_my_execs', myExecs);
+        db.ref('puyo_stats/execs').set(firebase.database.ServerValue.increment(1));
+        document.getElementById('best-score-display').textContent = "探索中...";
 
-    const inputs = document.querySelectorAll('.input-field');
-    const timeLimit = parseInt(inputs[22].value || placeholderHints[22]);
+        const inputs = document.querySelectorAll('.input-field');
+        const timeLimit = parseInt(inputs[22].value || placeholderHints[22]);
 
-    // 🚀 1. バーを表示して動かし始める
-    showProgressBar(timeLimit);
+        showProgressBar(timeLimit);
 
-    // 🚀 2. わずかに遅らせてからC言語の計算を開始（ブラウザに描画の隙を与える）
-    setTimeout(() => {
-        const nextColorsStr = (inputs[18].value || placeholderHints[18]).padStart(8, '1');
-        const nextPlusStr = (inputs[19].value || placeholderHints[19]).padStart(8, '0');
-        // (中略: 色設定などの既存コード) ...
-        for (let i = 0; i < 8; i++) {
-            const cell = document.getElementById(`next-cell-${i}`);
-            if (cell) {
-                const colorIdx = parseInt(nextColorsStr[i]) || 0;
-                const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
-                cell.style.backgroundColor = colors[colorIdx];
-                cell.textContent = nextPlusStr[i] === "1" ? "+" : "";
-            }
-        }
-        let n = 0;
-        const combinedData = Array.from(inputs).map(i => {
-            let val = i.value || placeholderHints[n++];
-            return val.padStart(8, '0');
-        }).join(",");
-
-        if (typeof Module !== 'undefined' && Module.ccall) {
-            Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
+        setTimeout(() => {
+            const nextColorsStr = (inputs[18].value || placeholderHints[18]).padStart(8, '1');
+            const nextPlusStr = (inputs[19].value || placeholderHints[19]).padStart(8, '0');
             
-            // 🚀 3. 計算が終わったらバーを100%にして消す
-            finishProgressBar();
-        }
-    }, 150); 
-}
+            for (let i = 0; i < 8; i++) {
+                const cell = document.getElementById(`next-cell-${i}`);
+                if (cell) {
+                    const colorIdx = parseInt(nextColorsStr[i]) || 0;
+                    const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
+                    cell.style.backgroundColor = colors[colorIdx];
+                    cell.textContent = nextPlusStr[i] === "1" ? "+" : "";
+                }
+            }
+            let n = 0;
+            const combinedData = Array.from(inputs).map(i => {
+                let val = i.value || placeholderHints[n++];
+                return val.padStart(8, '0');
+            }).join(",");
 
-    // バーを表示してCSSアニメーションを開始する
-function showProgressBar(seconds) {
-    const container = document.getElementById('progress-container');
-    const bar = document.getElementById('progress-bar');
-    
-    container.style.display = 'block';
-    
-    // アニメーションをセット
-    bar.style.animation = 'none'; // 一旦リセット
-    void bar.offsetWidth; 
-    bar.style.animation = `growBar ${seconds}s linear forwards`;
-}
+            if (typeof Module !== 'undefined' && Module.ccall) {
+                Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
+                finishProgressBar();
+            }
+        }, 150); 
+    }
 
-// 100%にしてから消す
-function finishProgressBar() {
-    const container = document.getElementById('progress-container');
-    const bar = document.getElementById('progress-bar');
-    
-    // 🚀 アニメーションを止めて、強制的に「1倍（100%）」にする
-    bar.style.animation = 'none';
-    bar.style.transform = 'scaleX(1)';
-    
-    setTimeout(() => {
-        container.style.display = 'none';
-        bar.style.transform = 'scaleX(0)'; // 次回のために戻しておく
-    }, 50);
-}
+    function showProgressBar(seconds) {
+        const container = document.getElementById('progress-container');
+        const bar = document.getElementById('progress-bar');
+        container.style.display = 'block';
+        bar.style.animation = 'none'; 
+        void bar.offsetWidth; 
+        bar.style.animation = `growBar ${seconds}s linear forwards`;
+    }
+
+    function finishProgressBar() {
+        const container = document.getElementById('progress-container');
+        const bar = document.getElementById('progress-bar');
+        bar.style.animation = 'none';
+        bar.style.transform = 'scaleX(1)';
+        setTimeout(() => {
+            container.style.display = 'none';
+            bar.style.transform = 'scaleX(0)'; 
+        }, 50);
+    }
 
     window.addPatternCount = function(count) {
         if (!count || isNaN(count)) return;
@@ -444,14 +384,13 @@ function finishProgressBar() {
         const colorCode = colorCodes[colorIndex] || "#fff";
         target.innerHTML = `${row} 行 ${col} 列 <span style="color: ${colorCode}; margin-left: 12px; font-size: 1.2em; text-shadow: 0 0 10px ${colorCode};">●</span>`;
     };
-    window.showNoResult = function() {
-    const display = document.getElementById('best-score-display');
-    display.textContent = "発見できず";
-    display.style.color = "#e74c3c"; // 警告色（赤色）に変えるとおしゃれ
 
-    // なぞり位置の表示もリセットする
-    document.getElementById('trace-result').textContent = "-- 行 -- 列";
-};
+    window.showNoResult = function() {
+        const display = document.getElementById('best-score-display');
+        display.textContent = "発見できず";
+        display.style.color = "#e74c3c";
+        document.getElementById('trace-result').textContent = "-- 行 -- 列";
+    };
 </script>
 <script src="puyosim.js"></script>
 </body>
