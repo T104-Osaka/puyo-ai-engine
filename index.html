@@ -91,14 +91,22 @@
         .comment-section { max-width: 1400px; margin: 40px auto; background-color: #34495e; padding: 25px; border-radius: 12px; }
         .comment-textarea { width: 100%; height: 60px; border-radius: 6px; border: 1px solid #7f8c8d; padding: 10px; box-sizing: border-box; margin: 15px 0; }
         .submit-btn { background-color: #3498db; color: white; border: none; padding: 10px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        #usage-icon { transition: transform 0.3s ease; display: inline-block; }
     </style>
 </head>
 <body>
 
     <h1> ぷよクエ解析シミュレータ </h1>
 
-    <div class="usage-section">
-        <strong>💡 使い方ガイド</strong><br>
+    <div class="usage-section" id="usage-guide">
+    <div onclick="toggleUsage()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+        <strong>💡 使い方ガイド（クリックで展開/格納）</strong>
+        <span id="usage-icon">▼</span>
+    </div>
+    
+    <div id="usage-content" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; margin-top: 0;">
+        <div style="padding-top: 15px; border-top: 1px solid rgba(241, 196, 15, 0.3); margin-top: 10px;">
+        <br>
         このシミュレータはぷよぷよクエストのぷよつかい大会におけるぬりかえをシミュレートし、素点が最大となるぬりかえを表示します.<br>
         <strong>1. 盤面空間の入力定義</strong><br>
         &emsp;全て半角で入力. 以降の項目も同様.<br>
@@ -126,7 +134,7 @@
         &emsp;出力盤面上部に「なぞり消し座標」および「属性変換の優先順序」を表示.<br>
         &emsp;・<strong>赤判定時</strong>: 赤からの変換が<strong>十分条件</strong>. 順序を誤るとぬりかえ時早期連結が発生し、なぞり消し前にオブジェクトが消滅する場合がある.<br>
         &emsp;・<strong>青判定時</strong>: 青からの変換が<strong>必要条件</strong>. 順序を誤るとぬりかえ時早期連結が発生し、なぞり消し前にオブジェクトが消滅する.<br>
-    </div>
+    </div></div> </div>
 
     <div class="wrapper">
         <div class="side-input">
@@ -318,6 +326,21 @@
             }
         }
     }
+
+    function toggleUsage() {
+    const content = document.getElementById('usage-content');
+    const icon = document.getElementById('usage-icon');
+    
+    if (content.style.max-height === '0px' || content.style.max-height === '') {
+        // 展開：中身の高さ（scrollHeight）を取得してセット
+        content.style.max-height = content.scrollHeight + "px";
+        icon.style.transform = "rotate(180deg)";
+    } else {
+        // 格納
+        content.style.max-height = "0px";
+        icon.style.transform = "rotate(0deg)";
+    }
+}
 
     function startSearch() {
         myExecs++;
