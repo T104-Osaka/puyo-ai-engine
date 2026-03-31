@@ -557,7 +557,7 @@ time_t start_time = time(NULL);
 	
 	if (local_CN1 < 0) local_CN1 = CONV_NUM1;
     if (local_CN2 < 0) local_CN2 = CONV_NUM2;
-	
+	tid=0;
 while (1) { 
 local_counter++;
 local_tried++;
@@ -566,8 +566,10 @@ local_tried++;
 			if(tid==16){
 				tid=0;
 			}
-			int local_CN1 = (tid < 16) ? (CONV_NUM1+CN1 - off1[tid]) : CONV_NUM1;
-    int local_CN2 = (tid < 16) ? (CONV_NUM2+CN2 - off2[tid]) : CONV_NUM2;
+			 local_CN1 = (tid < 16) ? (CN1 - off1[tid]) : CONV_NUM1;
+			 local_CN2 = (tid < 16) ? (CN2 - off2[tid]) : CONV_NUM2;
+			 if (local_CN1 < 0) local_CN1 = CONV_NUM1;
+			 if (local_CN2 < 0) local_CN2 = CONV_NUM2;
             if (difftime(time(NULL), start_time) >= time_limit) break;
         }
 
@@ -641,28 +643,38 @@ local_tried++;
 ////#pragma omp atomic
     tried_count += local_tried;
 }
-//// --- [結果送信処理] ---
+////// --- [結果送信処理] ---
     if (top10[0].score != -1) {
-        // 優先順位判定
+        // 1. スコアと位置の送信（ループの外で1回だけ）
         int priority = (check_composite_bouhatsu_1(board_color, top10[0].color) == 0) ? 1 : 2;
         int tap = top10[0].tap;
 
-        EM_ASM({ updateUITrace($0, $1, $2); }, (tap/8)+1, (tap%8)+1, priority);
+        EM_ASM({
+            if (window.updateBestScore) window.updateBestScore($0);
+            updateUITrace($1, $2, $3);
+        }, top10[0].score, (tap/8)+1, (tap%8)+1, priority);
 
+        // 2. 盤面の描画
         for (int i = 0; i < 48; i++) {
-            // 左上：もと
             EM_ASM({ updateUICell("original-board", $0, $1, $2, $3); }, i, board_color[i], board_plus[i], board_bonus[i]);
-            // 右上：結果
             EM_ASM({ updateUICell("output-board", $0, $1, $2, $3); }, i, top10[0].color[i], board_plus[i], board_bonus[i]);
-            // 左下：塗り替え1
+            
             int is1 = (top10[0].color[i] == 1 && board_color[i] != 1);
             EM_ASM({ updateUICell("repaint-board-1", $0, $1, 0, 0); }, i, is1 ? 1 : 0);
-            // 右下：塗り替え2
+            
             int is2 = (top10[0].color[i] == 2 && board_color[i] != 2);
             EM_ASM({ updateUICell("repaint-board-2", $0, $1, 0, 0); }, i, is2 ? 2 : 0);
-			EM_ASM({
-            addPatternCount($0);
-        }, (int)tried_count);
         }
+
+        // 3. 探索パターン数の送信（🚀 forループの外に出しました！）
+        EM_ASM({
+            if (window.addPatternCount) addPatternCount($0);
+        }, (int)tried_count);
+
+    } else {
+        // 【失敗時】
+        EM_ASM({
+            if (window.showNoResult) window.showNoResult();
+        });
     }
 }
