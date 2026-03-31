@@ -331,13 +331,13 @@
     const content = document.getElementById('usage-content');
     const icon = document.getElementById('usage-icon');
     
-    if (content.style.max-height === '0px' || content.style.max-height === '') {
+    if (content.style.maxHeight === '0px' || content.style.maxHeight === '') {
         // 展開：中身の高さ（scrollHeight）を取得してセット
-        content.style.max-height = content.scrollHeight + "px";
+        content.style.maxHeight = content.scrollHeight + "px";
         icon.style.transform = "rotate(180deg)";
     } else {
         // 格納
-        content.style.max-height = "0px";
+        content.style.maxHeight = "0px";
         icon.style.transform = "rotate(0deg)";
     }
 }
