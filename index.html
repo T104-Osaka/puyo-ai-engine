@@ -297,21 +297,34 @@
         document.getElementById('total-patterns').textContent = myPatterns.toLocaleString();
     }
 
-    function syncGuideText() {
+    function getLogicMap() {
+    const a = parseInt(document.getElementById('target-a').value) || 1;
+    const b = parseInt(document.getElementById('target-b').value) || 2;
+    let map = [0, 1, 2, 3, 4, 5];
+
+    let temp1 = map[1];
+    map[1] = map[a];
+    map[a] = temp1;
+
+    let bIdx = map.indexOf(b);
+    let temp2 = map[2];
+    map[2] = map[bIdx];
+    map[bIdx] = temp2;
+    return map;
+}
+
+// ガイドの説明文を同期する
+function syncGuideText() {
     const colorNames = ["ハート", "赤", "青", "緑", "黄", "紫"];
     const colorCodes = ["#ffdae9", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
-
-    // セレクトボックスの値を取得
     const aVal = document.getElementById('target-a').value;
     const bVal = document.getElementById('target-b').value;
 
-    // 説明文の「赤」「青」を書き換え
     document.getElementById('label-a-name').textContent = colorNames[aVal];
     document.getElementById('label-a-color').textContent = colorNames[aVal];
     document.getElementById('label-b-name').textContent = colorNames[bVal];
     document.getElementById('label-b-color').textContent = colorNames[bVal];
 
-    // ついでに色も変えると、より「直感的」になります
     document.getElementById('label-a-name').style.color = colorCodes[aVal];
     document.getElementById('label-b-name').style.color = colorCodes[bVal];
 }
@@ -377,36 +390,7 @@
         }
     }
 
-    C言語側を一切いじらず、JavaScript側だけで「色の入れ替え（置換）」を完結させるために修正が必要な箇所は3箇所です。
-
-数学的な「置換（Permutation）」の考え方を使って、1とa、2とbを確実に入れ替えるロジックを組み込みましょう。
-
-1. 変換テーブルを作る関数を追加
-まず、今の colorMap（表示用）とは別に、論理的な数字（0〜5）を入れ替えるためのテーブルを作る関数を script 内の適当な場所に追加します。
-
-JavaScript
-// どの数字をどの数字に化けさせるかを決めるテーブルを作る
-function getLogicMap() {
-    const a = parseInt(document.getElementById('target-a').value);
-    const b = parseInt(document.getElementById('target-b').value);
-
-    // デフォルト [0, 1, 2, 3, 4, 5]
-    let map = [0, 1, 2, 3, 4, 5];
-
-    // 1番とa番を入れ替える
-    let temp1 = map[1];
-    map[1] = map[a];
-    map[a] = temp1;
-
-    // 2番とb番が「今どこにいるか」を探して、2番と入れ替える
-    // これで a=2, b=1 の時も「1と2が入れ替わるだけ」で済む
-    let bIdx = map.indexOf(b);
-    let temp2 = map[2];
-    map[2] = map[bIdx];
-    map[bIdx] = temp2;
-
-    return map; // 例: a=3, b=4 なら [0, 3, 4, 1, 2, 5]
-}
+    
 
     function toggleUsage() {
     const content = document.getElementById('usage-content');
