@@ -297,7 +297,7 @@
 // 2. Workerから結果が届いた時の処理
 puyoWorker.onmessage = function(e) {
     if (e.data.type === 'RESULT') {
-        const { score, tap, colorArray, originalColorArray, priority } = e.data;
+        const { score, tap, colorArray, originalColorArray, priority, plusArray, bonusArray } = e.data;
 
         // 1. スコアと位置の表示更新
         updateBestScore(score);
