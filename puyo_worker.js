@@ -27,7 +27,9 @@ self.reportResultToMain = function(score, tap, colorArray, originalColorArray, p
         tap: tap,
         colorArray: colorArray,
         originalColorArray: originalColorArray,
-        priority: priority
+        priority: priority,
+        plusArray: plusArray,
+        bonusArray: bonusArray
     });
 };
 
