@@ -306,8 +306,11 @@ puyoWorker.onmessage = function(e) {
         // 2. 各盤面の描画
         colorArray.forEach((color, i) => {
             const origColor = originalColorArray[i];
+            const isPlus = plusArray[i];
+            const isBonus = bonusArray[i];
 
-            updateUICell("original-board", i, origColor, 0, 0);
+            // 塗り替え前盤面：色、プラス、ボーナスをすべて表示
+            updateUICell("original-board", i, origColor, isPlus, isBonus);
             
             // 解析後盤面の更新 (引数は colorIndex, plus, bonus)
             // ※plusとbonusは入力フィールドから取得するロジックが必要ですが、
