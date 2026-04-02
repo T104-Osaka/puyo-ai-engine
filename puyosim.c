@@ -688,7 +688,7 @@ local_tried++;
         int priority = (check_composite_bouhatsu_1(board_color, top10[0].color) == 0) ? 1 : 2;
         int tap = top10[0].tap;
 
-        // Workerにある「reportResultToMain」を呼ぶ
+// Workerにある「reportResultToMain」を呼ぶ
         EM_ASM({
             const score = $0;
             const tap = $1;
@@ -696,15 +696,15 @@ local_tried++;
             const colorPtr = $3;
             const originalColorPtr = $4;
 
-            // Wasmのメモリから48個のデータをJSの配列として取り出す
             const colorArray = [];
             const originalColorArray = [];
             for (let i = 0; i < 48; i++) {
-                colorArray.push(Module.HEAP8[colorPtr + i]);
-                originalColorArray.push(Module.HEAP8[originalColorPtr + i]);
+                // 🚀 Module. をとって HEAP8 直接参照にする
+                colorArray.push(HEAP8[colorPtr + i]);
+                originalColorArray.push(HEAP8[originalColorPtr + i]);
             }
 
-            // puyo_worker.js 内で定義した関数を呼び出す
+            // reportResultToMain を呼び出す
             reportResultToMain(score, tap, colorArray, originalColorArray, priority);
         }, top10[0].score, tap, priority, top10[0].color, board_color);
 
