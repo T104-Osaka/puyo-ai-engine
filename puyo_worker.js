@@ -19,8 +19,9 @@ onmessage = function(e) {
     }
 };
 
-// 4. C言語の EM_ASM から呼ばれる関数（selfをつけるのがコツ）
-self.reportResultToMain = function(score, tap, colorArray, originalColorArray, priority) {
+// 4. C言語の EM_ASM から呼ばれる関数
+// 🚀 ここを修正！ カッコの中に plusArray, bonusArray を追加しました
+self.reportResultToMain = function(score, tap, colorArray, originalColorArray, priority, plusArray, bonusArray) {
     self.postMessage({
         type: 'RESULT',
         score: score,
@@ -28,8 +29,8 @@ self.reportResultToMain = function(score, tap, colorArray, originalColorArray, p
         colorArray: colorArray,
         originalColorArray: originalColorArray,
         priority: priority,
-        plusArray: plusArray,
-        bonusArray: bonusArray
+        plusArray: plusArray, // これでエラーが消えます
+        bonusArray: bonusArray // これでエラーが消えます
     });
 };
 
