@@ -292,6 +292,44 @@
         "0", "0", "0", "0", "0", "0"
     ];
 
+    const puyoWorker = new Worker('puyo_worker.js');
+
+// 2. Workerから結果が届いた時の処理
+puyoWorker.onmessage = function(e) {
+    if (e.data.type === 'RESULT') {
+        const { score, tap, colorArray, originalColorArray, priority } = e.data;
+
+        // 1. スコアと位置の表示更新
+        updateBestScore(score);
+        updateUITrace(Math.floor(tap/8)+1, (tap%8)+1, priority);
+
+        // 2. 各盤面の描画
+        colorArray.forEach((color, i) => {
+            const origColor = originalColorArray[i];
+            
+            // 解析後盤面の更新 (引数は colorIndex, plus, bonus)
+            // ※plusとbonusは入力フィールドから取得するロジックが必要ですが、
+            // まずは色が変わることを確認しましょう。
+            updateUICell("output-board", i, color, 0, 0); 
+            
+            // 塗り替え位置a, bの更新
+            const isRepaint1 = (color === 1 && origColor !== 1);
+            const isRepaint2 = (color === 2 && origColor !== 2);
+            updateUICell("repaint-board-1", i, isRepaint1 ? 1 : 0);
+            updateUICell("repaint-board-2", i, isRepaint2 ? 2 : 0);
+        });
+
+        finishProgressBar();
+    } 
+    else if (e.data.type === 'PATTERNS') {
+        addPatternCount(e.data.count);
+    } 
+    else if (e.data.type === 'NO_RESULT') {
+        showNoResult();
+        finishProgressBar();
+    }
+};
+
     function updateStatsUI() {
         document.getElementById('total-execs').textContent = myExecs.toLocaleString();
         document.getElementById('total-patterns').textContent = myPatterns.toLocaleString();
@@ -408,50 +446,52 @@ function syncGuideText() {
 }
 
     function startSearch() {
-    myExecs++;
-    localStorage.setItem('puyo_my_execs', myExecs);
-    db.ref('puyo_stats/execs').set(firebase.database.ServerValue.increment(1));
-    document.getElementById('best-score-display').textContent = "探索中";
+        myExecs++;
+        localStorage.setItem('puyo_my_execs', myExecs);
+        db.ref('puyo_stats/execs').set(firebase.database.ServerValue.increment(1));
+        document.getElementById('best-score-display').textContent = "探索中";
 
-    const inputs = document.querySelectorAll('.input-field');
-    const timeLimit = parseInt(inputs[22].value || placeholderHints[22]);
-    showProgressBar(timeLimit);
-
-    setTimeout(() => {
-        const logicMap = getLogicMap(); // 🚀ここを追加
-        const nextColorsStr = (inputs[18].value || placeholderHints[18]).padStart(8, '1');
-        const nextPlusStr = (inputs[19].value || placeholderHints[19]).padStart(8, '0');
+        const inputs = document.querySelectorAll('.input-field');
+        const timeLimit = parseInt(inputs[22].value || placeholderHints[22]);
         
-        for (let i = 0; i < 8; i++) {
-            const cell = document.getElementById(`next-cell-${i}`);
-            if (cell) {
-                const colorIdx = parseInt(nextColorsStr[i]) || 0;
-                const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
-                cell.style.backgroundColor = colors[colorIdx];
-                cell.textContent = nextPlusStr[i] === "1" ? "+" : "";
+        // 🚀 プログレスバー開始
+        showProgressBar(timeLimit);
+
+        setTimeout(() => {
+            const logicMap = getLogicMap(); 
+            const nextColorsStr = (inputs[18].value || placeholderHints[18]).padStart(8, '1');
+            const nextPlusStr = (inputs[19].value || placeholderHints[19]).padStart(8, '0');
+            
+            // NEXTぷよのプレビュー表示
+            for (let i = 0; i < 8; i++) {
+                const cell = document.getElementById(`next-cell-${i}`);
+                if (cell) {
+                    const colorIdx = parseInt(nextColorsStr[i]) || 0;
+                    const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
+                    cell.style.backgroundColor = colors[colorIdx];
+                    cell.textContent = nextPlusStr[i] === "1" ? "+" : "";
+                }
             }
-        }
 
-        const combinedData = Array.from(inputs).map((input, idx) => {
-            let val = input.value || placeholderHints[idx];
-            val = val.padStart(8, '0');
-            // 🚀色情報(0-5)とネクスト(18)だけ入れ替える
-            if ((idx >= 0 && idx <= 5) || idx === 18) {
-                return val.split('').map(char => {
-                    const num = parseInt(char);
-                    return logicMap.indexOf(num);
-                }).join('');
-            }
-            return val;
-        }).join(",");
+            // データのパッキング
+            const combinedData = Array.from(inputs).map((input, idx) => {
+                let val = input.value || placeholderHints[idx];
+                val = val.padStart(8, '0');
+                if ((idx >= 0 && idx <= 5) || idx === 18) {
+                    return val.split('').map(char => {
+                        const num = parseInt(char);
+                        return logicMap.indexOf(num);
+                    }).join('');
+                }
+                return val;
+            }).join(",");
 
-        if (typeof Module !== 'undefined' && Module.ccall) {
-            Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
-            finishProgressBar();
-        }
-    }, 150);
-}
+            // 🚀 Moduleチェックを外してWorkerに送信！
+            puyoWorker.postMessage(combinedData);
 
+        }, 100);
+    }
+    
     function showProgressBar(seconds) {
         const container = document.getElementById('progress-container');
         const bar = document.getElementById('progress-bar');
@@ -518,6 +558,5 @@ function syncGuideText() {
         document.getElementById('trace-result').textContent = "-- 行 -- 列";
     };
 </script>
-<script src="puyosim.js"></script>
 </body>
 </html>
