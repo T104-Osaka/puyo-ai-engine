@@ -502,13 +502,14 @@ function syncGuideText() {
 };
 
     window.updateUITrace = function(row, col, colorIndex) {
-        const logicMap = getLogicMap();
-    const originalColor = logicMap[colorIndex];
-        const colorCodes = ["#ccc", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
-        const target = document.getElementById('trace-result');
-        const colorCode = colorCodes[originalColor] || "#fff";
-        target.innerHTML = `${row} 行 ${col} 列 <span style="color: ${colorCode}; margin-left: 12px; font-size: 1.2em; text-shadow: 0 0 10px ${colorCode};">●</span>`;
-    };
+    const logicMap = getLogicMap(); // 🚀ここを追加
+    const originalColor = logicMap[colorIndex]; // 🚀元に戻す
+
+    const colorCodes = ["#ccc", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
+    const target = document.getElementById('trace-result');
+    const colorCode = colorCodes[originalColor] || "#fff";
+    target.innerHTML = `${row} 行 ${col} 列 <span style="color: ${colorCode}; margin-left: 12px; font-size: 1.2em; text-shadow: 0 0 10px ${colorCode};">●</span>`;
+};
 
     window.showNoResult = function() {
         const display = document.getElementById('best-score-display');
