@@ -128,8 +128,22 @@
         
         <strong>2. ぬりかえ制約の設定</strong><br>
         &emsp;ぬりかえ数を属性別に入力. (※現在は赤・青の2属性のみ対応)<br>
-        &emsp;・<strong>塗 a</strong>: 赤属性の最大ぬりかえ数<br>
-        &emsp;・<strong>塗 b</strong>: 青属性の最大ぬりかえ数<br><br>
+        &emsp;・<strong>塗 a</strong>: 
+<select id="target-a" class="guide-select">
+    <option value="1" selected>赤 (1)</option>
+    <option value="2">青</option>
+    <option value="3">緑</option>
+    <option value="4">黄</option>
+    <option value="5">紫</option>
+</select> の最大ぬりかえ数<br>
+&emsp;・<strong>塗 b</strong>: 
+<select id="target-b" class="guide-select">
+    <option value="1">赤</option>
+    <option value="2">青</option>
+    <option value="3">緑</option>
+    <option value="4">黄</option>
+    <option value="5">紫</option>
+</select> の最大ぬりかえ数<br><br>
         
         <strong>3. 演算時間の設定</strong><br>
         &emsp;探索アルゴリズムの打ち切り時間(s)を入力. 単位は不要.<br>
@@ -177,11 +191,11 @@
             </div>
             <div class="display-row">
                 <div class="board-wrapper">
-                    <div class="board-title">塗り替え位置 1</div>
+                    <div class="board-title">塗り替え位置 a</div>
                     <div class="board-container"><div id="repaint-board-1" class="grid"></div></div>
                 </div>
                 <div class="board-wrapper">
-                    <div class="board-title">塗り替え位置 2</div>
+                    <div class="board-title">塗り替え位置 b</div>
                     <div class="board-container"><div id="repaint-board-2" class="grid"></div></div>
                 </div>
             </div>
