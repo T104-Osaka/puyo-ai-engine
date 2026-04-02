@@ -1,27 +1,30 @@
-// puyosim.js を読み込む
 importScripts('puyosim.js');
 
-// Wasmの準備ができたら実行される
 Module.onRuntimeInitialized = () => {
     console.log("Worker: Wasm Ready");
 };
 
-// メインスレッド（index.html）から命令が来たら動く
 onmessage = function(e) {
-    const combinedData = e.data;
-
-    // C言語の run_puyo_analysis を実行
-    // ※Cコード側で結果を EM_ASM などで返すようにしておく必要があります
-    Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
+    // index.html から届いたデータを解析に回す
+    Module.ccall('run_puyo_analysis', null, ['string'], [e.data]);
 };
 
-// C言語側（Wasm）から結果を受け取ってメインに送るための関数（CのEM_ASMから呼ぶ）
-function reportResultToMain(score, tap, colorArray, priority) {
+// C言語の EM_ASM から呼ばれる関数
+function reportResultToMain(score, tap, colorArray, originalColorArray, priority) {
     self.postMessage({
         type: 'RESULT',
         score: score,
         tap: tap,
         colorArray: colorArray,
+        originalColorArray: originalColorArray,
         priority: priority
     });
+}
+
+function reportPatterns(count) {
+    self.postMessage({ type: 'PATTERNS', count: count });
+}
+
+function reportNoResult() {
+    self.postMessage({ type: 'NO_RESULT' });
 }
