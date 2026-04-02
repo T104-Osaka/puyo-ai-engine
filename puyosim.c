@@ -61,8 +61,6 @@ v = 0.05x - 0.42y + 12.72を参考に
 
 
 // --- プロトタイプ宣言 ---
-extern void updateUICell(const char* gridId, int index, int colorIndex);
-extern void updateUITrace(int row, int col, int colorIndex);
 
 int bouhatsukakuninn(signed char board[48]);
 void show_status(signed char color[48], signed char plus[48], signed char bonus[48], signed char n_color[8], signed char n_plus[8]);
