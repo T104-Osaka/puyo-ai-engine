@@ -465,7 +465,7 @@ void run_puyo_analysis(char* combined_data) {
     int CN1=0,CN2=0,count=0;
 	char* token = strtok(combined_data, ",");
     srand((unsigned int)time(NULL));
-	
+	int hanni1 = 0,hanni = 0;
 
     while (token != NULL && count < 24) {
         // --- [0-5] 盤面の色 (盤面行 1-6) ---
@@ -514,6 +514,10 @@ void run_puyo_analysis(char* combined_data) {
         else if (count == 22) {
             time_limit = atoi(token);
         }
+		else if (count == 23) {
+			hanni1 = atoi(token);
+			hanni = (hanni1 * hanni1 + hanni1) / 2;
+		}
 
         token = strtok(NULL, ",");
         count++;
@@ -524,9 +528,47 @@ void run_puyo_analysis(char* combined_data) {
         printf("\n[!] 警告: この盤面はなぞる前に4つ以上繋がって消えてしまいます。\n");////////////////
     }
     // --- ここで探索ロジックを実行 ---
-    int off1[] = {0, 1, 0, 1, 2, 0, 2, 1, 3, 0, 2, 3, 1, 4, 0, 3, 2, 4, 1, 5, 0, 3, 4, 2, 5, 1, 6, 0, 4, 3, 5, 2, 6, 1, 7, 0, 4, 5, 3, 6, 2, 7, 1, 8, 0}; 
-    int off2[] = {0, 0, 1, 1, 0, 2, 1, 2, 0, 3, 2, 1, 3, 0, 4, 2, 3, 1, 4, 0, 5, 3, 2, 4, 1, 5, 0, 6, 3, 4, 2, 5, 1, 6, 0, 7, 4, 3, 5, 2, 6, 1, 7, 0, 8};
+    int off1[] = {
+    0, 
+    1, 0, 
+    1, 2, 0, 
+    2, 1, 3, 0, 
+    2, 3, 1, 4, 0, 
+    3, 2, 4, 1, 5, 0, 
+    3, 4, 2, 5, 1, 6, 0, 
+    4, 3, 5, 2, 6, 1, 7, 0, 
+    4, 5, 3, 6, 2, 7, 1, 8, 0, 
+    5, 4, 6, 3, 7, 2, 8, 1, 9, 0, 
+    5, 6, 4, 7, 3, 8, 2, 9, 1, 10, 0, 
+    6, 5, 7, 4, 8, 3, 9, 2, 10, 1, 11, 0, 
+    6, 7, 5, 8, 4, 9, 3, 10, 2, 11, 1, 12, 0, 
+    7, 6, 8, 5, 9, 4, 10, 3, 11, 2, 12, 1, 13, 0, 
+    7, 8, 6, 9, 5, 10, 4, 11, 3, 12, 2, 13, 1, 14, 0, 
+    8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15, 0, 
+    8, 9, 7, 10, 6, 11, 5, 12, 4, 13, 3, 14, 2, 15, 1, 16, 0
+};
 
+int off2[] = {
+    0, 
+    0, 1, 
+    1, 0, 2, 
+    1, 2, 0, 3, 
+    2, 1, 3, 0, 4, 
+    2, 3, 1, 4, 0, 5, 
+    3, 2, 4, 1, 5, 0, 6, 
+    3, 4, 2, 5, 1, 6, 0, 7, 
+    4, 3, 5, 2, 6, 1, 7, 0, 8, 
+    4, 5, 3, 6, 2, 7, 1, 8, 0, 9, 
+    5, 4, 6, 3, 7, 2, 8, 1, 9, 0, 10, 
+    5, 6, 4, 7, 3, 8, 2, 9, 1, 10, 0, 11, 
+    6, 5, 7, 4, 8, 3, 9, 2, 10, 1, 11, 0, 12, 
+    6, 7, 5, 8, 4, 9, 3, 10, 2, 11, 1, 12, 0, 13, 
+    7, 6, 8, 5, 9, 4, 10, 3, 11, 2, 12, 1, 13, 0, 14, 
+    7, 8, 6, 9, 5, 10, 4, 11, 3, 12, 2, 13, 1, 14, 0, 15, 
+    8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15, 0, 16
+};
+if (hanni < 1) hanni = 1;
+if (hanni > 153) hanni = 153;
 Ranking top10_all[10];
 for(int i=0; i<10; i++) top10_all[i].score = -1; 
 
@@ -563,11 +605,11 @@ local_counter++;
 local_tried++;
         if ((local_counter & 16383) == 0) {
 			tid++;
-			if(tid==16){
+			if(tid==hanni){
 				tid=0;
 			}
-			 local_CN1 = (tid < 16) ? (CN1 - off1[tid]) : CONV_NUM1;
-			 local_CN2 = (tid < 16) ? (CN2 - off2[tid]) : CONV_NUM2;
+			 local_CN1 = (tid < hanni) ? (CN1 - off1[tid]) : CONV_NUM1;
+			 local_CN2 = (tid < hanni) ? (CN2 - off2[tid]) : CONV_NUM2;
 			 if (local_CN1 < 0) local_CN1 = CONV_NUM1;
 			 if (local_CN2 < 0) local_CN2 = CONV_NUM2;
             if (difftime(time(NULL), start_time) >= time_limit) break;
@@ -645,36 +687,41 @@ local_tried++;
 }
 ////// --- [結果送信処理] ---
     if (top10[0].score != -1) {
-        // 1. スコアと位置の送信（ループの外で1回だけ）
         int priority = (check_composite_bouhatsu_1(board_color, top10[0].color) == 0) ? 1 : 2;
         int tap = top10[0].tap;
 
+        // Workerにある「reportResultToMain」を呼ぶ
         EM_ASM({
-            if (window.updateBestScore) window.updateBestScore($0);
-            updateUITrace($1, $2, $3);
-        }, top10[0].score, (tap/8)+1, (tap%8)+1, priority);
+            const score = $0;
+            const tap = $1;
+            const priority = $2;
+            const colorPtr = $3;
+            const originalColorPtr = $4;
 
-        // 2. 盤面の描画
-        for (int i = 0; i < 48; i++) {
-            EM_ASM({ updateUICell("original-board", $0, $1, $2, $3); }, i, board_color[i], board_plus[i], board_bonus[i]);
-            EM_ASM({ updateUICell("output-board", $0, $1, $2, $3); }, i, top10[0].color[i], board_plus[i], board_bonus[i]);
-            
-            int is1 = (top10[0].color[i] == 1 && board_color[i] != 1);
-            EM_ASM({ updateUICell("repaint-board-1", $0, $1, 0, 0); }, i, is1 ? 1 : 0);
-            
-            int is2 = (top10[0].color[i] == 2 && board_color[i] != 2);
-            EM_ASM({ updateUICell("repaint-board-2", $0, $1, 0, 0); }, i, is2 ? 2 : 0);
-        }
+            // Wasmのメモリから48個のデータをJSの配列として取り出す
+            const colorArray = [];
+            const originalColorArray = [];
+            for (let i = 0; i < 48; i++) {
+                colorArray.push(Module.HEAP8[colorPtr + i]);
+                originalColorArray.push(Module.HEAP8[originalColorPtr + i]);
+            }
 
-        // 3. 探索パターン数の送信（🚀 forループの外に出しました！）
+            // puyo_worker.js 内で定義した関数を呼び出す
+            reportResultToMain(score, tap, colorArray, originalColorArray, priority);
+        }, top10[0].score, tap, priority, top10[0].color, board_color);
+
+        // 探索パターン数の送信
         EM_ASM({
-            if (window.addPatternCount) addPatternCount($0);
+            if (typeof reportPatterns === 'function') {
+                reportPatterns($0);
+            }
         }, (int)tried_count);
 
     } else {
-        // 【失敗時】
         EM_ASM({
-            if (window.showNoResult) window.showNoResult();
+            if (typeof reportNoResult === 'function') {
+                reportNoResult();
+            }
         });
     }
 }
