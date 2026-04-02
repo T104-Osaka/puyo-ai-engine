@@ -408,20 +408,17 @@ function syncGuideText() {
 }
 
     function startSearch() {
-        myExecs++;
-        localStorage.setItem('puyo_my_execs', myExecs);
-        db.ref('puyo_stats/execs').set(firebase.database.ServerValue.increment(1));
-        document.getElementById('best-score-display').textContent = "探索中";
+    myExecs++;
+    localStorage.setItem('puyo_my_execs', myExecs);
+    db.ref('puyo_stats/execs').set(firebase.database.ServerValue.increment(1));
+    document.getElementById('best-score-display').textContent = "探索中";
 
-        const inputs = document.querySelectorAll('.input-field');
-        const timeLimit = parseInt(inputs[22].value || placeholderHints[22]);
+    const inputs = document.querySelectorAll('.input-field');
+    const timeLimit = parseInt(inputs[22].value || placeholderHints[22]);
+    showProgressBar(timeLimit);
 
-        showProgressBar(timeLimit);
-
-        setTimeout(() => {
-            const logicMap = getLogicMap();
-        // ------------------------------------
-
+    setTimeout(() => {
+        const logicMap = getLogicMap(); // 🚀ここを追加
         const nextColorsStr = (inputs[18].value || placeholderHints[18]).padStart(8, '1');
         const nextPlusStr = (inputs[19].value || placeholderHints[19]).padStart(8, '0');
         
@@ -435,22 +432,16 @@ function syncGuideText() {
             }
         }
 
-        let n = 0;
         const combinedData = Array.from(inputs).map((input, idx) => {
-            let val = input.value || placeholderHints[n++];
+            let val = input.value || placeholderHints[idx];
             val = val.padStart(8, '0');
-
-            // 🚀 ここがポイント！
-            // インデックス 0〜5 (行1〜6) と 18 (ネクスト色) だけ文字を入れ替える
+            // 🚀色情報(0-5)とネクスト(18)だけ入れ替える
             if ((idx >= 0 && idx <= 5) || idx === 18) {
                 return val.split('').map(char => {
                     const num = parseInt(char);
-                    // logicMap.indexOf(num) を使うことで、
-                    // 「本来の色a」を、C言語が期待する「1」に変換して送る
                     return logicMap.indexOf(num);
                 }).join('');
             }
-
             return val;
         }).join(",");
 
@@ -459,7 +450,7 @@ function syncGuideText() {
             finishProgressBar();
         }
     }, 150);
-    }
+}
 
     function showProgressBar(seconds) {
         const container = document.getElementById('progress-container');
@@ -487,23 +478,28 @@ function syncGuideText() {
     };
 
     window.updateUICell = function(gridId, index, colorIndex, isPlus = 0, isBonus = 0) {
-        const cell = document.getElementById(`${gridId}-cell-${index}`);
-        if (!cell) return;
-        const logicMap = getLogicMap();
-    const originalColor = logicMap[colorIndex];
-        const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
-        if (colorIndex === 0 && (gridId === "original-board" || gridId === "output-board")) {
-            cell.style.backgroundColor = "#ffdae9"; 
-        } else {
-            cell.style.backgroundColor = colors[originalColor] || "rgba(255,255,255,0.05)";
-        }
-        let text = "";
-        if (gridId !== "output-board") {
-            if (isPlus) text += "+";
-            if (isBonus) text += "B";
-        }
-        cell.textContent = text;
-    };
+    const cell = document.getElementById(`${gridId}-cell-${index}`);
+    if (!cell) return;
+    
+    const logicMap = getLogicMap(); // 🚀ここを追加
+    const originalColor = logicMap[colorIndex]; // 🚀元に戻す
+
+    const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
+    
+    // 🚀originalColor を使って判定
+    if (originalColor === 0 && (gridId === "original-board" || gridId === "output-board")) {
+        cell.style.backgroundColor = "#ffdae9"; 
+    } else {
+        cell.style.backgroundColor = colors[originalColor] || "rgba(255,255,255,0.05)";
+    }
+    
+    let text = "";
+    if (gridId !== "output-board") {
+        if (isPlus) text += "+";
+        if (isBonus) text += "B";
+    }
+    cell.textContent = text;
+};
 
     window.updateUITrace = function(row, col, colorIndex) {
         const logicMap = getLogicMap();
