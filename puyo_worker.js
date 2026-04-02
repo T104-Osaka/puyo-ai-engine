@@ -1,43 +1,30 @@
-// puyo_worker.js
+// (論理スレッド - 4) と 15 のうち、小さい方を選択（最低 1 は確保）
+const logicalThreads = navigator.hardwareConcurrency || 4; 
+const numSubWorkers = Math.max(1, Math.min(logicalThreads - 4, 15));
 
-// 1. Wasmの初期化設定を先に書く
-var Module = {
-    onRuntimeInitialized: function() {
-        console.log("Worker: Wasm Ready");
-    }
-};
+console.log(`System Logical Threads: ${logicalThreads}`);
+console.log(`Worker Pool Size: ${numSubWorkers}`);
 
-// 2. Wasm（Emscriptenが生成したJS）を読み込む
-importScripts('puyosim.js');
+const subWorkers = [];
+let bestScoreTotal = 0;
 
-// 3. メイン（index.html）からの指示を受け取る
+// 🚀 2. 算出した数だけ子Workerを生成
+for (let i = 0; i < numSubWorkers; i++) {
+    const sw = new Worker('sub_worker.js');
+    sw.onmessage = function(e) {
+        if (e.data.type === 'RESULT') {
+            if (e.data.score > bestScoreTotal) {
+                bestScoreTotal = e.data.score;
+                self.postMessage(e.data);
+            }
+        } else if (e.data.type === 'PATTERNS') {
+            self.postMessage(e.data);
+        }
+    };
+    subWorkers.push(sw);
+}
+
 onmessage = function(e) {
-    if (typeof Module.ccall === 'function') {
-        Module.ccall('run_puyo_analysis', null, ['string'], [e.data]);
-    } else {
-        console.error("Module is not ready yet.");
-    }
-};
-
-// 4. C言語の EM_ASM から呼ばれる関数
-// 🚀 ここを修正！ カッコの中に plusArray, bonusArray を追加しました
-self.reportResultToMain = function(score, tap, colorArray, originalColorArray, priority, plusArray, bonusArray) {
-    self.postMessage({
-        type: 'RESULT',
-        score: score,
-        tap: tap,
-        colorArray: colorArray,
-        originalColorArray: originalColorArray,
-        priority: priority,
-        plusArray: plusArray, // これでエラーが消えます
-        bonusArray: bonusArray // これでエラーが消えます
-    });
-};
-
-self.reportPatterns = function(count) {
-    self.postMessage({ type: 'PATTERNS', count: count });
-};
-
-self.reportNoResult = function() {
-    self.postMessage({ type: 'NO_RESULT' });
+    bestScoreTotal = 0;
+    subWorkers.forEach(sw => sw.postMessage(e.data));
 };
