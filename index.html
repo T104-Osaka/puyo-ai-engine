@@ -129,7 +129,7 @@
         <strong>2. ぬりかえ制約の設定</strong><br>
         &emsp;ぬりかえ数を属性別に入力. (※現在は赤・青の2属性のみ対応)<br>
         &emsp;・<strong>塗 a</strong>: 
-<select id="target-a" class="guide-select">
+<select id="target-a" class="guide-select" onchange="syncGuideText()">
     <option value="1" selected>赤</option>
     <option value="2">青</option>
     <option value="3">緑</option>
@@ -137,7 +137,7 @@
     <option value="5">紫</option>
 </select> の最大ぬりかえ数<br>
 &emsp;・<strong>塗 b</strong>: 
-<select id="target-b" class="guide-select">
+<select id="target-b" class="guide-select" onchange="syncGuideText()">
     <option value="1">赤</option>
     <option value="2" selected>青</option>
     <option value="3">緑</option>
@@ -157,10 +157,12 @@
         &emsp;「探索開始」を押下. 計算処理がメインスレッドを占有するため、ブラウザから「応答なし」の警告が出る場合があるが、バックグラウンドでの収束計算は正常に進行中. 処理完了まで待機.<br><br>
         
         <strong>6. 解析結果の解釈と実行順序</strong><br>
-        &emsp;出力盤面上部に「なぞり消し座標」および「属性変換の優先順序」を表示.<br>
-        &emsp;・<strong>赤判定時</strong>: 赤からの変換が<strong>十分条件</strong>. 順序を誤るとぬりかえ時早期連結が発生し、なぞり消し前にオブジェクトが消滅する場合がある.<br>
-        &emsp;・<strong>青判定時</strong>: 青からの変換が<strong>必要条件</strong>. 順序を誤るとぬりかえ時早期連結が発生し、なぞり消し前にオブジェクトが消滅する.<br>
-    </div></div> </div>
+&emsp;出力盤面上部に「なぞり消し座標」および「属性変換の優先順序」を表示.<br>
+&emsp;・<strong><span id="label-a-name">赤</span>判定時</strong>: 
+<span id="label-a-color">赤</span>からの変換が<strong>十分条件</strong>. 順序を誤るとぬりかえ時早期連結が発生し、なぞり消し前にオブジェクトが消滅する場合がある.<br>
+&emsp;・<strong><span id="label-b-name">青</span>判定時</strong>: 
+<span id="label-b-color">青</span>からの変換が<strong>必要条件</strong>. 順序を誤るとぬりかえ時早期連結が発生し、なぞり消し前にオブジェクトが消滅する.<br>
+        </div></div> </div>
 
     <div class="wrapper">
         <div class="side-input">
@@ -295,11 +297,32 @@
         document.getElementById('total-patterns').textContent = myPatterns.toLocaleString();
     }
 
+    function syncGuideText() {
+    const colorNames = ["ハート", "赤", "青", "緑", "黄", "紫"];
+    const colorCodes = ["#ffdae9", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
+
+    // セレクトボックスの値を取得
+    const aVal = document.getElementById('target-a').value;
+    const bVal = document.getElementById('target-b').value;
+
+    // 説明文の「赤」「青」を書き換え
+    document.getElementById('label-a-name').textContent = colorNames[aVal];
+    document.getElementById('label-a-color').textContent = colorNames[aVal];
+    document.getElementById('label-b-name').textContent = colorNames[bVal];
+    document.getElementById('label-b-color').textContent = colorNames[bVal];
+
+    // ついでに色も変えると、より「直感的」になります
+    document.getElementById('label-a-name').style.color = colorCodes[aVal];
+    document.getElementById('label-b-name').style.color = colorCodes[bVal];
+}
+
     window.updateBestScore = function(score) {
         const display = document.getElementById('best-score-display');
         display.textContent = score.toLocaleString();
         display.style.color = score > 150 ? "#f1c40f" : "#fff";
     };
+
+   
 
     window.addEventListener('DOMContentLoaded', () => {
         db.ref('puyo_stats').on('value', (snapshot) => {
@@ -337,6 +360,7 @@
         createExcelGrid('output-board');
         createExcelGrid('repaint-board-1');
         createExcelGrid('repaint-board-2');
+        syncGuideText();
     });
 
     function createExcelGrid(gridId) {
@@ -352,6 +376,37 @@
             }
         }
     }
+
+    C言語側を一切いじらず、JavaScript側だけで「色の入れ替え（置換）」を完結させるために修正が必要な箇所は3箇所です。
+
+数学的な「置換（Permutation）」の考え方を使って、1とa、2とbを確実に入れ替えるロジックを組み込みましょう。
+
+1. 変換テーブルを作る関数を追加
+まず、今の colorMap（表示用）とは別に、論理的な数字（0〜5）を入れ替えるためのテーブルを作る関数を script 内の適当な場所に追加します。
+
+JavaScript
+// どの数字をどの数字に化けさせるかを決めるテーブルを作る
+function getLogicMap() {
+    const a = parseInt(document.getElementById('target-a').value);
+    const b = parseInt(document.getElementById('target-b').value);
+
+    // デフォルト [0, 1, 2, 3, 4, 5]
+    let map = [0, 1, 2, 3, 4, 5];
+
+    // 1番とa番を入れ替える
+    let temp1 = map[1];
+    map[1] = map[a];
+    map[a] = temp1;
+
+    // 2番とb番が「今どこにいるか」を探して、2番と入れ替える
+    // これで a=2, b=1 の時も「1と2が入れ替わるだけ」で済む
+    let bIdx = map.indexOf(b);
+    let temp2 = map[2];
+    map[2] = map[bIdx];
+    map[bIdx] = temp2;
+
+    return map; // 例: a=3, b=4 なら [0, 3, 4, 1, 2, 5]
+}
 
     function toggleUsage() {
     const content = document.getElementById('usage-content');
@@ -380,29 +435,46 @@
         showProgressBar(timeLimit);
 
         setTimeout(() => {
-            const nextColorsStr = (inputs[18].value || placeholderHints[18]).padStart(8, '1');
-            const nextPlusStr = (inputs[19].value || placeholderHints[19]).padStart(8, '0');
-            
-            for (let i = 0; i < 8; i++) {
-                const cell = document.getElementById(`next-cell-${i}`);
-                if (cell) {
-                    const colorIdx = parseInt(nextColorsStr[i]) || 0;
-                    const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
-                    cell.style.backgroundColor = colors[colorIdx];
-                    cell.textContent = nextPlusStr[i] === "1" ? "+" : "";
-                }
-            }
-            let n = 0;
-            const combinedData = Array.from(inputs).map(i => {
-                let val = i.value || placeholderHints[n++];
-                return val.padStart(8, '0');
-            }).join(",");
+            const logicMap = getLogicMap();
+        // ------------------------------------
 
-            if (typeof Module !== 'undefined' && Module.ccall) {
-                Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
-                finishProgressBar();
+        const nextColorsStr = (inputs[18].value || placeholderHints[18]).padStart(8, '1');
+        const nextPlusStr = (inputs[19].value || placeholderHints[19]).padStart(8, '0');
+        
+        for (let i = 0; i < 8; i++) {
+            const cell = document.getElementById(`next-cell-${i}`);
+            if (cell) {
+                const colorIdx = parseInt(nextColorsStr[i]) || 0;
+                const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
+                cell.style.backgroundColor = colors[colorIdx];
+                cell.textContent = nextPlusStr[i] === "1" ? "+" : "";
             }
-        }, 150); 
+        }
+
+        let n = 0;
+        const combinedData = Array.from(inputs).map((input, idx) => {
+            let val = input.value || placeholderHints[n++];
+            val = val.padStart(8, '0');
+
+            // 🚀 ここがポイント！
+            // インデックス 0〜5 (行1〜6) と 18 (ネクスト色) だけ文字を入れ替える
+            if ((idx >= 0 && idx <= 5) || idx === 18) {
+                return val.split('').map(char => {
+                    const num = parseInt(char);
+                    // logicMap.indexOf(num) を使うことで、
+                    // 「本来の色a」を、C言語が期待する「1」に変換して送る
+                    return logicMap.indexOf(num);
+                }).join('');
+            }
+
+            return val;
+        }).join(",");
+
+        if (typeof Module !== 'undefined' && Module.ccall) {
+            Module.ccall('run_puyo_analysis', null, ['string'], [combinedData]);
+            finishProgressBar();
+        }
+    }, 150);
     }
 
     function showProgressBar(seconds) {
@@ -433,11 +505,13 @@
     window.updateUICell = function(gridId, index, colorIndex, isPlus = 0, isBonus = 0) {
         const cell = document.getElementById(`${gridId}-cell-${index}`);
         if (!cell) return;
+        const logicMap = getLogicMap();
+    const originalColor = logicMap[colorIndex];
         const colors = ["transparent", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
         if (colorIndex === 0 && (gridId === "original-board" || gridId === "output-board")) {
             cell.style.backgroundColor = "#ffdae9"; 
         } else {
-            cell.style.backgroundColor = colors[colorIndex] || "rgba(255,255,255,0.05)";
+            cell.style.backgroundColor = colors[originalColor] || "rgba(255,255,255,0.05)";
         }
         let text = "";
         if (gridId !== "output-board") {
@@ -448,9 +522,11 @@
     };
 
     window.updateUITrace = function(row, col, colorIndex) {
+        const logicMap = getLogicMap();
+    const originalColor = logicMap[colorIndex];
         const colorCodes = ["#ccc", "#ff3e3e", "#4da3ff", "#3eff3e", "#ffeb3e", "#ae81ff"];
         const target = document.getElementById('trace-result');
-        const colorCode = colorCodes[colorIndex] || "#fff";
+        const colorCode = colorCodes[originalColor] || "#fff";
         target.innerHTML = `${row} 行 ${col} 列 <span style="color: ${colorCode}; margin-left: 12px; font-size: 1.2em; text-shadow: 0 0 10px ${colorCode};">●</span>`;
     };
 
