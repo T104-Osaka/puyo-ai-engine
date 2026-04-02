@@ -695,18 +695,24 @@ local_tried++;
             const priority = $2;
             const colorPtr = $3;
             const originalColorPtr = $4;
+			const plusPtr = $5;
+            const bonusPtr = $6;
 
             const colorArray = [];
             const originalColorArray = [];
+			const plusArray = [];
+            const bonusArray = [];
             for (let i = 0; i < 48; i++) {
                 // 🚀 Module. をとって HEAP8 直接参照にする
                 colorArray.push(HEAP8[colorPtr + i]);
                 originalColorArray.push(HEAP8[originalColorPtr + i]);
+				plusArray.push(HEAP8[plusPtr + i]);  
+                bonusArray.push(HEAP8[bonusPtr + i]);
             }
 
             // reportResultToMain を呼び出す
-            reportResultToMain(score, tap, colorArray, originalColorArray, priority);
-        }, top10[0].score, tap, priority, top10[0].color, board_color);
+            reportResultToMain(score, tap, colorArray, originalColorArray, priority, plusArray, bonusArray);
+        }, top10[0].score, tap, priority, top10[0].color, board_color, board_plus, board_bonus);
 
         // 探索パターン数の送信
         EM_ASM({
